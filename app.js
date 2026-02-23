@@ -18,6 +18,7 @@
   const storageInfo = document.getElementById("storage-info");
   const slotsRoot = document.getElementById("slots");
   const logList = document.getElementById("log-list");
+  const kathiComplimentText = document.getElementById("kathi-compliment");
 
   const feedingForm = document.getElementById("feeding-form");
   const userPresetButtons = Array.from(document.querySelectorAll(".user-preset"));
@@ -47,6 +48,33 @@
     diaryEntries: []
   };
 
+  const KATHI_COMPLIMENTS = [
+    "Kathi, du schaffst es jeden Tag, dass sich alles ein bisschen leichter anfuehlt.",
+    "Deine Ruhe und dein Blick fuer die wichtigen Dinge sind einfach besonders.",
+    "Mit dir wird selbst ein chaotischer Tag zu etwas, das man gut meistern kann.",
+    "Du hast eine Art, die Menschen um dich herum sofort wohler fuehlen zu lassen.",
+    "Dein Einsatz fuer die Familie ist stark, konstant und richtig beeindruckend.",
+    "Du bringst Waerme in den Alltag, ohne viel Aufhebens darum zu machen.",
+    "Deine Geduld und dein Herz sind eine seltene Kombination.",
+    "Du machst so viele kleine Dinge richtig, die fuer alle einen grossen Unterschied machen.",
+    "Deine Verlaesslichkeit ist ein riesiger Anker fuer alle um dich herum.",
+    "Du hast einen tollen Humor, der genau dann kommt, wenn man ihn braucht.",
+    "Deine Art zuzuhoren ist eine echte Staerke.",
+    "Du hast ein Auge fuer Details, die anderen oft entgehen.",
+    "Du bist kreativ, pragmatisch und herzlich zugleich.",
+    "Mit deiner Energie bringst du Struktur und gute Stimmung zusammen.",
+    "Du gibst dem Alltag eine Qualitaet, die man nicht planen kann.",
+    "Du bist fuer viele Dinge gleichzeitig da und machst das mit erstaunlicher Leichtigkeit.",
+    "Dein Mitgefuehl und deine Klarheit passen perfekt zusammen.",
+    "Du bist stark, ohne laut sein zu muessen.",
+    "Du schaffst es, dass sich Zuhause wirklich wie Zuhause anfuehlt.",
+    "Deine positive Art steckt an und tut allen gut.",
+    "Du machst aus normalen Tagen oft richtig schoene Momente.",
+    "Deine Ausdauer ist bemerkenswert und inspirierend.",
+    "Du bist eine echte Teamplayerin mit einem grossen Herzen.",
+    "Deine Art, Dinge anzupacken, ist konzentriert und bewundernswert."
+  ];
+
   init();
 
   async function init() {
@@ -54,6 +82,7 @@
     setSelectedUser("Benny");
     setSelectedToiletKind("SHIT");
     diaryDateInput.value = state.selectedDate;
+    renderKathiCompliment();
     registerServiceWorker();
     setupInstallPrompt();
     attachEvents();
@@ -839,5 +868,28 @@
       fromMs: localStart.getTime(),
       toMs: localEnd.getTime()
     };
+  }
+
+  function renderKathiCompliment() {
+    if (!kathiComplimentText) {
+      return;
+    }
+    const today = new Date();
+    const dayNumber = Math.floor(
+      Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) / 86400000
+    );
+    const compliment = pickDailyCompliment(dayNumber);
+    kathiComplimentText.textContent = compliment;
+  }
+
+  function pickDailyCompliment(dayNumber) {
+    const total = KATHI_COMPLIMENTS.length;
+    if (total === 0) {
+      return "Kathi, du bist grossartig.";
+    }
+    const step = 7;
+    const offset = 3;
+    const index = ((dayNumber * step + offset) % total + total) % total;
+    return KATHI_COMPLIMENTS[index];
   }
 })();

@@ -41,6 +41,19 @@ body {
   color: var(--muted);
 }
 
+.compliment-panel {
+  background:
+    radial-gradient(circle at 90% 20%, #ffe4b8 0, transparent 35%),
+    radial-gradient(circle at 10% 80%, #d9f0be 0, transparent 35%),
+    #fffdf8;
+}
+
+.compliment-text {
+  margin: 0;
+  font-size: 1.06rem;
+  line-height: 1.45;
+}
+
 .panel {
   background: var(--panel);
   border: 1px solid var(--border);
