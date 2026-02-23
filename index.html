@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7ef">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Hundefuetterung">
+  <title>Familie | Hundefuetterung</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <header class="app-header">
+      <h1>Hundefuetterung</h1>
+      <p>Gemeinsame Anzeige fuer die Familie ohne Login</p>
+    </header>
+
+    <section class="panel date-panel">
+      <label for="selected-date">Tag</label>
+      <input id="selected-date" type="date">
+      <button id="today-btn" type="button">Heute</button>
+      <button id="install-btn" type="button">Als App nutzen</button>
+      <small id="storage-info"></small>
+    </section>
+
+    <section class="panel">
+      <h2>Ampel je Fuetterungszeit</h2>
+      <div id="slots" class="slots"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Fuetterung eintragen</h2>
+      <form id="feeding-form" class="feeding-form">
+        <label>
+          Zeit
+          <input id="fed-at" type="datetime-local" required>
+        </label>
+        <label>
+          Menge (g)
+          <input id="amount-g" type="number" min="1" step="1" placeholder="z.B. 180" required>
+        </label>
+        <label>
+          Name
+          <input id="fed-by" type="text" maxlength="40" placeholder="z.B. Mama">
+        </label>
+        <label>
+          Notiz
+          <input id="note" type="text" maxlength="120" placeholder="optional">
+        </label>
+        <button type="submit">Eintrag speichern</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title-row">
+        <h2>Log</h2>
+        <button id="refresh-btn" type="button">Neu laden</button>
+      </div>
+      <div id="log-list" class="log-list"></div>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
