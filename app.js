@@ -15,7 +15,9 @@
   const logList = document.getElementById("log-list");
 
   const feedingForm = document.getElementById("feeding-form");
-  const fedAtInput = document.getElementById("fed-at");
+  const fedDateInput = document.getElementById("fed-date");
+  const fedTimeInput = document.getElementById("fed-time");
+  const slotPresetButtons = Array.from(document.querySelectorAll(".slot-preset"));
   const amountInput = document.getElementById("amount-g");
   const fedByInput = document.getElementById("fed-by");
   const noteInput = document.getElementById("note");
@@ -35,7 +37,9 @@
 
   async function init() {
     selectedDateInput.value = state.selectedDate;
-    fedAtInput.value = defaultDateTimeLocal();
+    fedDateInput.value = state.selectedDate;
+    fedTimeInput.value = defaultTimeLocal();
+    fedByInput.value = "Benny";
     registerServiceWorker();
     setupInstallPrompt();
     attachEvents();
@@ -45,14 +49,25 @@
   function attachEvents() {
     selectedDateInput.addEventListener("change", async function () {
       state.selectedDate = selectedDateInput.value;
+      fedDateInput.value = state.selectedDate;
       await loadEntries();
     });
 
     todayBtn.addEventListener("click", async function () {
       state.selectedDate = todayISODate();
       selectedDateInput.value = state.selectedDate;
-      fedAtInput.value = defaultDateTimeLocal();
+      fedDateInput.value = state.selectedDate;
+      fedTimeInput.value = defaultTimeLocal();
       await loadEntries();
+    });
+
+    slotPresetButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        const time = button.getAttribute("data-time");
+        if (time) {
+          fedTimeInput.value = time;
+        }
+      });
     });
 
     refreshBtn.addEventListener("click", loadEntries);
@@ -60,7 +75,14 @@
     feedingForm.addEventListener("submit", async function (event) {
       event.preventDefault();
 
-      const fedAt = fedAtInput.value ? new Date(fedAtInput.value) : new Date();
+      const datePart = (fedDateInput.value || "").trim();
+      const timePart = (fedTimeInput.value || "").trim();
+      if (!datePart || !timePart) {
+        alert("Bitte Datum und Uhrzeit angeben.");
+        return;
+      }
+
+      const fedAt = new Date(datePart + "T" + timePart + ":00");
       if (Number.isNaN(fedAt.getTime())) {
         alert("Ungueltige Zeit.");
         return;
@@ -83,7 +105,9 @@
       try {
         await api.createEntry(payload);
         feedingForm.reset();
-        fedAtInput.value = defaultDateTimeLocal();
+        fedDateInput.value = state.selectedDate;
+        fedTimeInput.value = defaultTimeLocal();
+        fedByInput.value = "Benny";
         await loadEntries();
       } catch (error) {
         alert("Speichern fehlgeschlagen: " + String(error.message || error));
@@ -322,13 +346,11 @@
     return d.getFullYear() + "-" + month + "-" + day;
   }
 
-  function defaultDateTimeLocal() {
+  function defaultTimeLocal() {
     const d = new Date();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
     const hour = String(d.getHours()).padStart(2, "0");
     const minute = String(d.getMinutes()).padStart(2, "0");
-    return d.getFullYear() + "-" + month + "-" + day + "T" + hour + ":" + minute;
+    return hour + ":" + minute;
   }
 
   function createLocalApi() {

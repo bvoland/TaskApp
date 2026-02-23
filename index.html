@@ -37,16 +37,29 @@
       <h2>Fuetterung eintragen</h2>
       <form id="feeding-form" class="feeding-form">
         <label>
-          Zeit
-          <input id="fed-at" type="datetime-local" required>
+          Datum
+          <input id="fed-date" type="date" required>
         </label>
+        <label>
+          Uhrzeit
+          <input id="fed-time" type="time" step="60" required>
+        </label>
+        <div class="time-presets" aria-label="Schnellwahl Zeiten">
+          <button type="button" class="slot-preset" data-time="08:00">08:00</button>
+          <button type="button" class="slot-preset" data-time="12:00">12:00</button>
+          <button type="button" class="slot-preset" data-time="16:00">16:00</button>
+          <button type="button" class="slot-preset" data-time="20:00">20:00</button>
+        </div>
         <label>
           Menge (g)
           <input id="amount-g" type="number" min="1" step="1" placeholder="z.B. 180" required>
         </label>
         <label>
           Name
-          <input id="fed-by" type="text" maxlength="40" placeholder="z.B. Mama">
+          <select id="fed-by" required>
+            <option value="Benny">Benny</option>
+            <option value="Kathi">Kathi</option>
+          </select>
         </label>
         <label>
           Notiz

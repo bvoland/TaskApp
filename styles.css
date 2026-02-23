@@ -60,15 +60,18 @@ body {
 }
 
 input,
+select,
 button {
   font: inherit;
   min-height: 44px;
 }
 
-input {
+input,
+select {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 8px 10px;
+  background: #fff;
 }
 
 button {
@@ -147,6 +150,17 @@ button:hover {
   align-self: end;
 }
 
+.time-presets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  align-self: end;
+}
+
+.slot-preset {
+  border-style: dashed;
+}
+
 .panel-title-row {
   display: flex;
   justify-content: space-between;
@@ -207,6 +221,10 @@ button:hover {
 
   .feeding-form {
     grid-template-columns: 1fr;
+  }
+
+  .time-presets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .slot,
