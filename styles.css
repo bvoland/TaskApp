@@ -146,6 +146,11 @@ button:hover {
   gap: 4px;
 }
 
+.form-hint {
+  margin: 0;
+  color: var(--muted);
+}
+
 .user-field {
   display: grid;
   gap: 6px;
@@ -157,17 +162,6 @@ button:hover {
 
 .feeding-form button {
   align-self: end;
-}
-
-.time-presets {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  align-self: end;
-}
-
-.slot-preset {
-  border-style: dashed;
 }
 
 .user-picker {
@@ -245,10 +239,6 @@ button:hover {
 
   .feeding-form {
     grid-template-columns: 1fr;
-  }
-
-  .time-presets {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .slot,

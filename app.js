@@ -4,6 +4,7 @@
   const FEEDING_SLOTS = ["08:00", "12:00", "16:00", "20:00"];
   const SLOT_WINDOW_MINUTES = 120;
   const LATE_AFTER_MINUTES = 90;
+  const SLOT_ASSIGNMENT_WINDOW_MINUTES = 60;
   const STORAGE_KEY = "dog-feedings-v1";
   const STORAGE_KEY_PREFIX = "dog-feedings-v";
   const STORAGE_MIGRATION_MARKER_KEY = "dog-feedings-migrated-v1";
@@ -17,9 +18,6 @@
   const logList = document.getElementById("log-list");
 
   const feedingForm = document.getElementById("feeding-form");
-  const fedDateInput = document.getElementById("fed-date");
-  const fedTimeInput = document.getElementById("fed-time");
-  const slotPresetButtons = Array.from(document.querySelectorAll(".slot-preset"));
   const userPresetButtons = Array.from(document.querySelectorAll(".user-preset"));
   const amountInput = document.getElementById("amount-g");
   const fedByInput = document.getElementById("fed-by");
@@ -40,8 +38,6 @@
 
   async function init() {
     selectedDateInput.value = state.selectedDate;
-    fedDateInput.value = state.selectedDate;
-    fedTimeInput.value = defaultTimeLocal();
     setSelectedUser("Benny");
     registerServiceWorker();
     setupInstallPrompt();
@@ -52,25 +48,13 @@
   function attachEvents() {
     selectedDateInput.addEventListener("change", async function () {
       state.selectedDate = selectedDateInput.value;
-      fedDateInput.value = state.selectedDate;
       await loadEntries();
     });
 
     todayBtn.addEventListener("click", async function () {
       state.selectedDate = todayISODate();
       selectedDateInput.value = state.selectedDate;
-      fedDateInput.value = state.selectedDate;
-      fedTimeInput.value = defaultTimeLocal();
       await loadEntries();
-    });
-
-    slotPresetButtons.forEach(function (button) {
-      button.addEventListener("click", function () {
-        const time = button.getAttribute("data-time");
-        if (time) {
-          fedTimeInput.value = time;
-        }
-      });
     });
 
     userPresetButtons.forEach(function (button) {
@@ -87,16 +71,10 @@
     feedingForm.addEventListener("submit", async function (event) {
       event.preventDefault();
 
-      const datePart = (fedDateInput.value || "").trim();
-      const timePart = (fedTimeInput.value || "").trim();
-      if (!datePart || !timePart) {
-        alert("Bitte Datum und Uhrzeit angeben.");
-        return;
-      }
-
-      const fedAt = new Date(datePart + "T" + timePart + ":00");
-      if (Number.isNaN(fedAt.getTime())) {
-        alert("Ungueltige Zeit.");
+      const fedAt = new Date();
+      const slotTime = slotWithinWindowHHMM(fedAt);
+      if (!slotTime) {
+        alert("Aktuell nicht im Slot-Fenster. Eintrag ist nur bis 1 Stunde vor oder nach 08:00, 12:00, 16:00, 20:00 moeglich.");
         return;
       }
 
@@ -111,15 +89,15 @@
         amount_g: Math.round(amountG),
         fed_by: (fedByInput.value || "").trim(),
         note: (noteInput.value || "").trim(),
-        slot_time: nearestSlotHHMM(fedAt)
+        slot_time: slotTime
       };
 
       try {
         await api.createEntry(payload);
         feedingForm.reset();
-        fedDateInput.value = state.selectedDate;
-        fedTimeInput.value = defaultTimeLocal();
         setSelectedUser("Benny");
+        state.selectedDate = todayISODate();
+        selectedDateInput.value = state.selectedDate;
         await loadEntries();
       } catch (error) {
         alert("Speichern fehlgeschlagen: " + String(error.message || error));
@@ -249,7 +227,7 @@
       row.innerHTML =
         '<div class="log-item-main">' +
         "<strong>" + dateText + " | " + safe(entry.amount_g) + " g</strong>" +
-        "<small>Slot: " + safe(entry.slot_time || "-") + " | Von: " + safe(entry.fed_by || "-") + "</small>" +
+        "<small>Von: " + safe(entry.fed_by || "-") + "</small>" +
         "<small>Notiz: " + safe(entry.note || "-") + "</small>" +
         "</div>";
 
@@ -314,15 +292,15 @@
     return map;
   }
 
-  function nearestSlotHHMM(dateObj) {
+  function slotWithinWindowHHMM(dateObj) {
     const totalMinutes = dateObj.getHours() * 60 + dateObj.getMinutes();
-    let best = FEEDING_SLOTS[0];
+    let best = null;
     let bestDistance = Number.POSITIVE_INFINITY;
     FEEDING_SLOTS.forEach(function (slot) {
       const parts = slot.split(":");
       const slotMinutes = Number(parts[0]) * 60 + Number(parts[1]);
       const dist = Math.abs(slotMinutes - totalMinutes);
-      if (dist < bestDistance) {
+      if (dist <= SLOT_ASSIGNMENT_WINDOW_MINUTES && dist < bestDistance) {
         bestDistance = dist;
         best = slot;
       }
@@ -365,13 +343,6 @@
     const month = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
     return d.getFullYear() + "-" + month + "-" + day;
-  }
-
-  function defaultTimeLocal() {
-    const d = new Date();
-    const hour = String(d.getHours()).padStart(2, "0");
-    const minute = String(d.getMinutes()).padStart(2, "0");
-    return hour + ":" + minute;
   }
 
   function createLocalApi() {
