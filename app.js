@@ -6,6 +6,7 @@
   const LATE_AFTER_MINUTES = 90;
   const SLOT_ASSIGNMENT_WINDOW_MINUTES = 60;
   const STORAGE_KEY = "dog-feedings-v1";
+  const DIARY_STORAGE_KEY = "family-diary-v1";
   const STORAGE_KEY_PREFIX = "dog-feedings-v";
   const STORAGE_MIGRATION_MARKER_KEY = "dog-feedings-migrated-v1";
 
@@ -22,6 +23,11 @@
   const amountInput = document.getElementById("amount-g");
   const fedByInput = document.getElementById("fed-by");
   const noteInput = document.getElementById("note");
+  const diaryForm = document.getElementById("diary-form");
+  const diaryDateInput = document.getElementById("diary-date");
+  const diaryAuthorInput = document.getElementById("diary-author");
+  const diaryTextInput = document.getElementById("diary-text");
+  const diaryTimeline = document.getElementById("diary-timeline");
 
   const config = window.APP_CONFIG || {};
   const hasSupabase = Boolean(config.supabaseUrl && config.supabaseAnonKey);
@@ -31,7 +37,8 @@
 
   const state = {
     selectedDate: todayISODate(),
-    entries: []
+    entries: [],
+    diaryEntries: []
   };
 
   init();
@@ -39,22 +46,25 @@
   async function init() {
     selectedDateInput.value = state.selectedDate;
     setSelectedUser("Benny");
+    diaryDateInput.value = state.selectedDate;
     registerServiceWorker();
     setupInstallPrompt();
     attachEvents();
-    await loadEntries();
+    await loadAllData();
   }
 
   function attachEvents() {
     selectedDateInput.addEventListener("change", async function () {
       state.selectedDate = selectedDateInput.value;
-      await loadEntries();
+      diaryDateInput.value = state.selectedDate;
+      await loadAllData();
     });
 
     todayBtn.addEventListener("click", async function () {
       state.selectedDate = todayISODate();
       selectedDateInput.value = state.selectedDate;
-      await loadEntries();
+      diaryDateInput.value = state.selectedDate;
+      await loadAllData();
     });
 
     userPresetButtons.forEach(function (button) {
@@ -66,7 +76,7 @@
       });
     });
 
-    refreshBtn.addEventListener("click", loadEntries);
+    refreshBtn.addEventListener("click", loadAllData);
 
     feedingForm.addEventListener("submit", async function (event) {
       event.preventDefault();
@@ -98,9 +108,40 @@
         setSelectedUser("Benny");
         state.selectedDate = todayISODate();
         selectedDateInput.value = state.selectedDate;
-        await loadEntries();
+        diaryDateInput.value = state.selectedDate;
+        await loadAllData();
       } catch (error) {
         alert("Speichern fehlgeschlagen: " + String(error.message || error));
+      }
+    });
+
+    diaryForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const entryDate = (diaryDateInput.value || "").trim();
+      const text = (diaryTextInput.value || "").trim();
+      const author = (diaryAuthorInput.value || "").trim();
+
+      if (!entryDate) {
+        alert("Bitte ein Datum waehlen.");
+        return;
+      }
+      if (!text) {
+        alert("Bitte einen Tagebuchtext eingeben.");
+        return;
+      }
+
+      try {
+        await api.createDiaryEntry({
+          entry_date: entryDate,
+          text: text,
+          author: author
+        });
+        diaryTextInput.value = "";
+        diaryAuthorInput.value = "";
+        await loadAllData();
+      } catch (error) {
+        alert("Tagebuch speichern fehlgeschlagen: " + String(error.message || error));
       }
     });
   }
@@ -161,12 +202,25 @@
     });
   }
 
+  async function loadAllData() {
+    await Promise.all([loadEntries(), loadDiaryEntries()]);
+  }
+
   async function loadEntries() {
     try {
       state.entries = await api.listEntriesByDate(state.selectedDate);
       render();
     } catch (error) {
       alert("Laden fehlgeschlagen: " + String(error.message || error));
+    }
+  }
+
+  async function loadDiaryEntries() {
+    try {
+      state.diaryEntries = await api.listDiaryEntries();
+      renderDiaryTimeline();
+    } catch (error) {
+      alert("Tagebuch laden fehlgeschlagen: " + String(error.message || error));
     }
   }
 
@@ -250,6 +304,66 @@
 
       row.appendChild(delBtn);
       logList.appendChild(row);
+    });
+  }
+
+  function renderDiaryTimeline() {
+    if (!state.diaryEntries.length) {
+      diaryTimeline.innerHTML = "<p>Noch keine Tagebucheintraege vorhanden.</p>";
+      return;
+    }
+
+    const sorted = state.diaryEntries.slice().sort(function (a, b) {
+      const ad = String(a.entry_date || "");
+      const bd = String(b.entry_date || "");
+      if (ad !== bd) {
+        return ad < bd ? 1 : -1;
+      }
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+
+    let html = "";
+    let currentDate = "";
+    sorted.forEach(function (entry) {
+      if (entry.entry_date !== currentDate) {
+        currentDate = entry.entry_date;
+        const dateLabel = new Date(currentDate + "T00:00:00").toLocaleDateString("de-DE", {
+          weekday: "long",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric"
+        });
+        html += '<h3 class="timeline-date">' + safe(dateLabel) + "</h3>";
+      }
+
+      const created = new Date(entry.created_at);
+      const createdText = created.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+      html +=
+        '<article class="diary-item">' +
+        '<div class="diary-meta">' + safe(createdText) + " | " + safe(entry.author || "Ohne Name") + "</div>" +
+        '<div class="diary-body">' + safe(entry.text) + "</div>" +
+        '<button type="button" class="danger diary-delete" data-id="' + safe(entry.id) + '">Loeschen</button>' +
+        "</article>";
+    });
+
+    diaryTimeline.innerHTML = html;
+    Array.from(diaryTimeline.querySelectorAll(".diary-delete")).forEach(function (button) {
+      button.addEventListener("click", async function () {
+        const id = button.getAttribute("data-id");
+        if (!id) {
+          return;
+        }
+        const ok = confirm("Tagebucheintrag wirklich loeschen?");
+        if (!ok) {
+          return;
+        }
+        try {
+          await api.deleteDiaryEntry(id);
+          await loadDiaryEntries();
+        } catch (error) {
+          alert("Loeschen fehlgeschlagen: " + String(error.message || error));
+        }
+      });
     });
   }
 
@@ -411,6 +525,20 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dedupeById(entries)));
     }
 
+    function readDiaryAll() {
+      const raw = localStorage.getItem(DIARY_STORAGE_KEY);
+      try {
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_error) {
+        return [];
+      }
+    }
+
+    function writeDiaryAll(entries) {
+      localStorage.setItem(DIARY_STORAGE_KEY, JSON.stringify(entries));
+    }
+
     return {
       async listEntriesByDate(dateISO) {
         const all = readAll();
@@ -435,12 +563,32 @@
           return item.id !== id;
         });
         writeAll(next);
+      },
+      async listDiaryEntries() {
+        return readDiaryAll();
+      },
+      async createDiaryEntry(payload) {
+        const all = readDiaryAll();
+        all.push({
+          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2),
+          created_at: new Date().toISOString(),
+          ...payload
+        });
+        writeDiaryAll(all);
+      },
+      async deleteDiaryEntry(id) {
+        const all = readDiaryAll();
+        writeDiaryAll(all.filter(function (item) {
+          return item.id !== id;
+        }));
       }
     };
   }
 
   function createSupabaseApi(cfg) {
-    const base = cfg.supabaseUrl.replace(/\/+$/, "") + "/rest/v1/dog_feedings";
+    const root = cfg.supabaseUrl.replace(/\/+$/, "");
+    const base = root + "/rest/v1/dog_feedings";
+    const diaryBase = root + "/rest/v1/family_diary_entries";
 
     async function request(url, options) {
       const response = await fetch(url, {
@@ -485,6 +633,28 @@
       async deleteEntry(id) {
         const query = "?id=eq." + encodeURIComponent(id);
         await request(base + query, {
+          method: "DELETE",
+          headers: { Prefer: "return=minimal" }
+        });
+      },
+      async listDiaryEntries() {
+        const query =
+          "?select=id,created_at,entry_date,author,text" +
+          "&order=entry_date.desc" +
+          "&order=created_at.desc" +
+          "&limit=300";
+        const data = await request(diaryBase + query, { method: "GET" });
+        return Array.isArray(data) ? data : [];
+      },
+      async createDiaryEntry(payload) {
+        await request(diaryBase, {
+          method: "POST",
+          body: JSON.stringify([payload])
+        });
+      },
+      async deleteDiaryEntry(id) {
+        const query = "?id=eq." + encodeURIComponent(id);
+        await request(diaryBase + query, {
           method: "DELETE",
           headers: { Prefer: "return=minimal" }
         });

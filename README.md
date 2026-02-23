@@ -11,6 +11,7 @@ Erste Funktion: Oeffentliche Web-App (ohne Login) fuer die Familie, um Hundefuet
   - Name (optional)
   - Notiz (optional)
 - Log pro Tag mit Loeschfunktion
+- Unabhaengiges Tagebuch mit Datum, Text und Zeitstrahl
 - Shared Storage ueber Supabase (empfohlen) oder lokaler Fallback
 - Responsive Layout fuer Smartphone, Tablet und Desktop
 - Als mobile App installierbar (PWA: Android + iOS Home-Bildschirm)
@@ -24,6 +25,7 @@ Erste Funktion: Oeffentliche Web-App (ohne Login) fuer die Familie, um Hundefuet
 
 1. Supabase Projekt erstellen.
 2. In SQL Editor den Inhalt aus `supabase.sql` ausfuehren.
+   - Bei bestehendem Projekt einfach erneut ausfuehren (enthaelt `if not exists` und `drop policy if exists`).
 3. In Supabase unter `Project Settings -> API`:
    - `Project URL` kopieren
    - `anon public` Key kopieren

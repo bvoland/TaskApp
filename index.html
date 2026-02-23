@@ -66,6 +66,32 @@
       </div>
       <div id="log-list" class="log-list"></div>
     </section>
+
+    <section class="panel">
+      <h2>Tagebuch</h2>
+      <form id="diary-form" class="diary-form">
+        <label>
+          Datum
+          <input id="diary-date" type="date" required>
+        </label>
+        <label>
+          Person
+          <select id="diary-author">
+            <option value="">Ohne Name</option>
+            <option value="Benny">Benny</option>
+            <option value="Kathi">Kathi</option>
+            <option value="Lukas">Lukas</option>
+            <option value="Amelie">Amelie</option>
+          </select>
+        </label>
+        <label class="diary-text">
+          Eintrag
+          <textarea id="diary-text" rows="3" maxlength="400" placeholder="Was ist heute passiert?" required></textarea>
+        </label>
+        <button type="submit">Tagebuch speichern</button>
+      </form>
+      <div id="diary-timeline" class="diary-timeline"></div>
+    </section>
   </main>
 
   <script src="config.js"></script>
