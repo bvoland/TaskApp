@@ -1,6 +1,6 @@
 {
-  "name": "Charly Feed",
-  "short_name": "Charly Feed",
+  "name": "Charly Feed App",
+  "short_name": "Charly Feed App",
   "description": "Gemeinsame Fuetterungsanzeige fuer Charly.",
   "start_url": "./",
   "scope": "./",
