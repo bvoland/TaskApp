@@ -1,4 +1,4 @@
-const CACHE_NAME = "dog-feed-app-v1";
+const CACHE_NAME = "dog-feed-app-v2";
 const STATIC_ASSETS = [
   "./",
   "./index.html",
@@ -37,19 +37,27 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) {
-        return cached;
-      }
+  const url = new URL(event.request.url);
+  const isSameOrigin = url.origin === self.location.origin;
+  const isAppShellAsset = isSameOrigin && (
+    url.pathname.endsWith(".html") ||
+    url.pathname.endsWith(".js") ||
+    url.pathname.endsWith(".css") ||
+    url.pathname.endsWith(".webmanifest")
+  );
 
-      return fetch(event.request)
+  if (isAppShellAsset) {
+    event.respondWith(
+      fetch(event.request)
         .then((networkResponse) => {
           const copy = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return networkResponse;
         })
-        .catch(() => caches.match("./index.html"));
-    })
-  );
+        .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html")))
+    );
+    return;
+  }
+
+  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request)));
 });

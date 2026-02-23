@@ -54,13 +54,14 @@
           Menge (g)
           <input id="amount-g" type="number" min="1" step="1" placeholder="z.B. 180" required>
         </label>
-        <label>
-          Name
-          <select id="fed-by" required>
-            <option value="Benny">Benny</option>
-            <option value="Kathi">Kathi</option>
-          </select>
-        </label>
+        <div class="user-field">
+          <span>Person</span>
+          <div class="user-picker" aria-label="Person waehlen" role="group">
+            <button type="button" class="user-preset active" data-user="Benny" aria-pressed="true">Benny</button>
+            <button type="button" class="user-preset" data-user="Kathi" aria-pressed="false">Kathi</button>
+          </div>
+          <input id="fed-by" type="hidden" value="Benny" required>
+        </div>
         <label>
           Notiz
           <input id="note" type="text" maxlength="120" placeholder="optional">

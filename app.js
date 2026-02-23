@@ -20,6 +20,7 @@
   const fedDateInput = document.getElementById("fed-date");
   const fedTimeInput = document.getElementById("fed-time");
   const slotPresetButtons = Array.from(document.querySelectorAll(".slot-preset"));
+  const userPresetButtons = Array.from(document.querySelectorAll(".user-preset"));
   const amountInput = document.getElementById("amount-g");
   const fedByInput = document.getElementById("fed-by");
   const noteInput = document.getElementById("note");
@@ -41,7 +42,7 @@
     selectedDateInput.value = state.selectedDate;
     fedDateInput.value = state.selectedDate;
     fedTimeInput.value = defaultTimeLocal();
-    fedByInput.value = "Benny";
+    setSelectedUser("Benny");
     registerServiceWorker();
     setupInstallPrompt();
     attachEvents();
@@ -68,6 +69,15 @@
         const time = button.getAttribute("data-time");
         if (time) {
           fedTimeInput.value = time;
+        }
+      });
+    });
+
+    userPresetButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        const user = button.getAttribute("data-user");
+        if (user) {
+          setSelectedUser(user);
         }
       });
     });
@@ -109,11 +119,20 @@
         feedingForm.reset();
         fedDateInput.value = state.selectedDate;
         fedTimeInput.value = defaultTimeLocal();
-        fedByInput.value = "Benny";
+        setSelectedUser("Benny");
         await loadEntries();
       } catch (error) {
         alert("Speichern fehlgeschlagen: " + String(error.message || error));
       }
+    });
+  }
+
+  function setSelectedUser(userName) {
+    fedByInput.value = userName;
+    userPresetButtons.forEach(function (button) {
+      const active = button.getAttribute("data-user") === userName;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
     });
   }
 
