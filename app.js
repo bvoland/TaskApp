@@ -369,6 +369,7 @@
     const now = new Date();
     const selectedDateStart = startOfDay(new Date(state.selectedDate + "T00:00:00"));
     const isToday = sameDate(selectedDateStart, startOfDay(now));
+    const selectedIsPastOrToday = selectedDateStart.getTime() <= startOfDay(now).getTime();
 
     const entriesBySlot = groupLastEntryBySlot(state.entries);
     slotsRoot.innerHTML = "";
@@ -377,20 +378,69 @@
       const slotDate = dateWithHHMM(selectedDateStart, slot);
       const entry = entriesBySlot[slot] || null;
       const status = evaluateSlotStatus(slotDate, entry, isToday ? now : null);
+      const canManualSet = !entry && selectedIsPastOrToday && (!isToday || slotDate.getTime() <= now.getTime());
 
       const card = document.createElement("article");
       card.className = "slot";
-      card.innerHTML =
-        '<div class="slot-left">' +
-        '<span class="lamp ' + status.kind + '"></span>' +
-        '<strong>' + slot + "</strong>" +
-        "</div>" +
-        "<div>" +
-        "<div>" + status.label + "</div>" +
-        "<small>" + status.detail + "</small>" +
-        "</div>";
+      const left = document.createElement("div");
+      left.className = "slot-left";
+      left.innerHTML = '<span class="lamp ' + status.kind + '"></span><strong>' + slot + "</strong>";
+
+      const right = document.createElement("div");
+      right.innerHTML = "<div>" + status.label + "</div><small>" + status.detail + "</small>";
+
+      if (canManualSet) {
+        const manualBtn = document.createElement("button");
+        manualBtn.type = "button";
+        manualBtn.className = "slot-manual-btn";
+        manualBtn.textContent = "Manuell auf gruen";
+        manualBtn.addEventListener("click", async function () {
+          await manualMarkSlotAsFed(slotDate, slot);
+        });
+        right.appendChild(document.createElement("br"));
+        right.appendChild(manualBtn);
+      }
+
+      card.appendChild(left);
+      card.appendChild(right);
       slotsRoot.appendChild(card);
     });
+  }
+
+  async function manualMarkSlotAsFed(slotDate, slot) {
+    const suggested = String(guessDefaultAmountG());
+    const raw = prompt("Menge in Gramm fuer " + slot + ":", suggested);
+    if (raw === null) {
+      return;
+    }
+    const amountG = Number(raw);
+    if (!Number.isFinite(amountG) || amountG <= 0) {
+      alert("Bitte eine gueltige Menge in Gramm angeben.");
+      return;
+    }
+
+    try {
+      await api.createEntry({
+        fed_at: slotDate.toISOString(),
+        amount_g: Math.round(amountG),
+        fed_by: "Manuell",
+        note: "Manuell auf gruen gesetzt",
+        slot_time: slot
+      });
+      await loadEntries();
+    } catch (error) {
+      alert("Manuelles Setzen fehlgeschlagen: " + String(error.message || error));
+    }
+  }
+
+  function guessDefaultAmountG() {
+    const sorted = state.entries.slice().sort(function (a, b) {
+      return new Date(b.fed_at) - new Date(a.fed_at);
+    });
+    const last = sorted.find(function (entry) {
+      return Number.isFinite(Number(entry.amount_g)) && Number(entry.amount_g) > 0;
+    });
+    return last ? Math.round(Number(last.amount_g)) : 180;
   }
 
   function renderLog() {

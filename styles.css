@@ -154,6 +154,10 @@ button:hover {
   color: var(--muted);
 }
 
+.slot-manual-btn {
+  margin-top: 6px;
+}
+
 .feeding-form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

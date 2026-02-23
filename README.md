@@ -5,6 +5,7 @@ Erste Funktion: Oeffentliche Web-App (ohne Login) fuer die Familie, um Hundefuet
 ## Funktionen
 
 - Ampelanzeige je Slot: `08:00`, `12:00`, `16:00`, `20:00`
+- Vergangene Slots koennen bei Bedarf manuell auf gruen gesetzt werden
 - Eintrag von:
   - Zeitpunkt der Fuetterung
   - Menge in Gramm
