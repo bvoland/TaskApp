@@ -12,6 +12,7 @@ Erste Funktion: Oeffentliche Web-App (ohne Login) fuer die Familie, um Hundefuet
   - Notiz (optional)
 - Log pro Tag mit Loeschfunktion
 - Unabhaengiges Tagebuch mit Datum, Text und Zeitstrahl
+- Zusaetzliches Shit & Piss Log (Typ waehlen, Zeit/Datum automatisch jetzt)
 - Shared Storage ueber Supabase (empfohlen) oder lokaler Fallback
 - Responsive Layout fuer Smartphone, Tablet und Desktop
 - Als mobile App installierbar (PWA: Android + iOS Home-Bildschirm)

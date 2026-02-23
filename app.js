@@ -6,6 +6,7 @@
   const LATE_AFTER_MINUTES = 90;
   const SLOT_ASSIGNMENT_WINDOW_MINUTES = 60;
   const STORAGE_KEY = "dog-feedings-v1";
+  const TOILET_STORAGE_KEY = "dog-toilet-v1";
   const DIARY_STORAGE_KEY = "family-diary-v1";
   const STORAGE_KEY_PREFIX = "dog-feedings-v";
   const STORAGE_MIGRATION_MARKER_KEY = "dog-feedings-migrated-v1";
@@ -23,6 +24,10 @@
   const amountInput = document.getElementById("amount-g");
   const fedByInput = document.getElementById("fed-by");
   const noteInput = document.getElementById("note");
+  const toiletForm = document.getElementById("toilet-form");
+  const toiletKindInput = document.getElementById("toilet-kind");
+  const toiletPresetButtons = Array.from(document.querySelectorAll(".toilet-preset"));
+  const toiletLogList = document.getElementById("toilet-log-list");
   const diaryForm = document.getElementById("diary-form");
   const diaryDateInput = document.getElementById("diary-date");
   const diaryAuthorInput = document.getElementById("diary-author");
@@ -38,6 +43,7 @@
   const state = {
     selectedDate: todayISODate(),
     entries: [],
+    toiletEntries: [],
     diaryEntries: []
   };
 
@@ -46,6 +52,7 @@
   async function init() {
     selectedDateInput.value = state.selectedDate;
     setSelectedUser("Benny");
+    setSelectedToiletKind("SHIT");
     diaryDateInput.value = state.selectedDate;
     registerServiceWorker();
     setupInstallPrompt();
@@ -72,6 +79,15 @@
         const user = button.getAttribute("data-user");
         if (user) {
           setSelectedUser(user);
+        }
+      });
+    });
+
+    toiletPresetButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        const kind = button.getAttribute("data-kind");
+        if (kind) {
+          setSelectedToiletKind(kind);
         }
       });
     });
@@ -115,6 +131,30 @@
       }
     });
 
+    toiletForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const kind = (toiletKindInput.value || "").trim();
+      if (kind !== "SHIT" && kind !== "PISS") {
+        alert("Bitte Shit oder Piss auswaehlen.");
+        return;
+      }
+
+      try {
+        await api.createToiletEntry({
+          event_at: new Date().toISOString(),
+          kind: kind
+        });
+        setSelectedToiletKind("SHIT");
+        state.selectedDate = todayISODate();
+        selectedDateInput.value = state.selectedDate;
+        diaryDateInput.value = state.selectedDate;
+        await loadAllData();
+      } catch (error) {
+        alert("Shit & Piss speichern fehlgeschlagen: " + String(error.message || error));
+      }
+    });
+
     diaryForm.addEventListener("submit", async function (event) {
       event.preventDefault();
 
@@ -150,6 +190,15 @@
     fedByInput.value = userName;
     userPresetButtons.forEach(function (button) {
       const active = button.getAttribute("data-user") === userName;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  }
+
+  function setSelectedToiletKind(kind) {
+    toiletKindInput.value = kind;
+    toiletPresetButtons.forEach(function (button) {
+      const active = button.getAttribute("data-kind") === kind;
       button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", active ? "true" : "false");
     });
@@ -203,7 +252,7 @@
   }
 
   async function loadAllData() {
-    await Promise.all([loadEntries(), loadDiaryEntries()]);
+    await Promise.all([loadEntries(), loadToiletEntries(), loadDiaryEntries()]);
   }
 
   async function loadEntries() {
@@ -224,9 +273,67 @@
     }
   }
 
+  async function loadToiletEntries() {
+    try {
+      state.toiletEntries = await api.listToiletEntriesByDate(state.selectedDate);
+      renderToiletLog();
+    } catch (error) {
+      alert("Shit & Piss laden fehlgeschlagen: " + String(error.message || error));
+    }
+  }
+
   function render() {
     renderSlots();
     renderLog();
+  }
+
+  function renderToiletLog() {
+    if (!state.toiletEntries.length) {
+      toiletLogList.innerHTML = "<p>Noch keine Eintraege an diesem Tag.</p>";
+      return;
+    }
+
+    const sorted = state.toiletEntries.slice().sort(function (a, b) {
+      return new Date(b.event_at) - new Date(a.event_at);
+    });
+
+    toiletLogList.innerHTML = "";
+    sorted.forEach(function (entry) {
+      const row = document.createElement("article");
+      row.className = "log-item";
+
+      const when = new Date(entry.event_at).toLocaleString("de-DE", {
+        dateStyle: "short",
+        timeStyle: "short"
+      });
+      const typeLabel = entry.kind === "PISS" ? "Piss" : "Shit";
+
+      row.innerHTML =
+        '<div class="log-item-main">' +
+        "<strong>" + safe(typeLabel) + "</strong>" +
+        "<small>" + safe(when) + "</small>" +
+        "</div>";
+
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "danger";
+      delBtn.textContent = "Loeschen";
+      delBtn.addEventListener("click", async function () {
+        const ok = confirm("Eintrag wirklich loeschen?");
+        if (!ok) {
+          return;
+        }
+        try {
+          await api.deleteToiletEntry(entry.id);
+          await loadToiletEntries();
+        } catch (error) {
+          alert("Loeschen fehlgeschlagen: " + String(error.message || error));
+        }
+      });
+
+      row.appendChild(delBtn);
+      toiletLogList.appendChild(row);
+    });
   }
 
   function renderSlots() {
@@ -539,6 +646,20 @@
       localStorage.setItem(DIARY_STORAGE_KEY, JSON.stringify(entries));
     }
 
+    function readToiletAll() {
+      const raw = localStorage.getItem(TOILET_STORAGE_KEY);
+      try {
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_error) {
+        return [];
+      }
+    }
+
+    function writeToiletAll(entries) {
+      localStorage.setItem(TOILET_STORAGE_KEY, JSON.stringify(entries));
+    }
+
     return {
       async listEntriesByDate(dateISO) {
         const all = readAll();
@@ -581,6 +702,29 @@
         writeDiaryAll(all.filter(function (item) {
           return item.id !== id;
         }));
+      },
+      async listToiletEntriesByDate(dateISO) {
+        const all = readToiletAll();
+        const range = localDateUtcRange(dateISO);
+        return all.filter(function (entry) {
+          const t = new Date(entry.event_at).getTime();
+          return t >= range.fromMs && t <= range.toMs;
+        });
+      },
+      async createToiletEntry(payload) {
+        const all = readToiletAll();
+        all.push({
+          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2),
+          created_at: new Date().toISOString(),
+          ...payload
+        });
+        writeToiletAll(all);
+      },
+      async deleteToiletEntry(id) {
+        const all = readToiletAll();
+        writeToiletAll(all.filter(function (item) {
+          return item.id !== id;
+        }));
       }
     };
   }
@@ -588,6 +732,7 @@
   function createSupabaseApi(cfg) {
     const root = cfg.supabaseUrl.replace(/\/+$/, "");
     const base = root + "/rest/v1/dog_feedings";
+    const toiletBase = root + "/rest/v1/dog_toilet_events";
     const diaryBase = root + "/rest/v1/family_diary_entries";
 
     async function request(url, options) {
@@ -655,6 +800,31 @@
       async deleteDiaryEntry(id) {
         const query = "?id=eq." + encodeURIComponent(id);
         await request(diaryBase + query, {
+          method: "DELETE",
+          headers: { Prefer: "return=minimal" }
+        });
+      },
+      async listToiletEntriesByDate(dateISO) {
+        const range = localDateUtcRange(dateISO);
+        const from = new Date(range.fromMs).toISOString();
+        const to = new Date(range.toMs).toISOString();
+        const query =
+          "?select=id,created_at,event_at,kind" +
+          "&event_at=gte." + encodeURIComponent(from) +
+          "&event_at=lte." + encodeURIComponent(to) +
+          "&order=event_at.desc";
+        const data = await request(toiletBase + query, { method: "GET" });
+        return Array.isArray(data) ? data : [];
+      },
+      async createToiletEntry(payload) {
+        await request(toiletBase, {
+          method: "POST",
+          body: JSON.stringify([payload])
+        });
+      },
+      async deleteToiletEntry(id) {
+        const query = "?id=eq." + encodeURIComponent(id);
+        await request(toiletBase + query, {
           method: "DELETE",
           headers: { Prefer: "return=minimal" }
         });

@@ -63,3 +63,33 @@ on public.family_diary_entries
 for delete
 to anon
 using (true);
+
+create table if not exists public.dog_toilet_events (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  event_at timestamptz not null,
+  kind text not null check (kind in ('SHIT', 'PISS'))
+);
+
+alter table public.dog_toilet_events enable row level security;
+
+drop policy if exists "anon_read_toilet" on public.dog_toilet_events;
+create policy "anon_read_toilet"
+on public.dog_toilet_events
+for select
+to anon
+using (true);
+
+drop policy if exists "anon_insert_toilet" on public.dog_toilet_events;
+create policy "anon_insert_toilet"
+on public.dog_toilet_events
+for insert
+to anon
+with check (true);
+
+drop policy if exists "anon_delete_toilet" on public.dog_toilet_events;
+create policy "anon_delete_toilet"
+on public.dog_toilet_events
+for delete
+to anon
+using (true);

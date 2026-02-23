@@ -68,6 +68,19 @@
     </section>
 
     <section class="panel">
+      <h2>Shit &amp; Piss Log</h2>
+      <form id="toilet-form" class="toilet-form">
+        <div class="toilet-picker" role="group" aria-label="Typ waehlen">
+          <button type="button" class="toilet-preset active" data-kind="SHIT" aria-pressed="true">Shit</button>
+          <button type="button" class="toilet-preset" data-kind="PISS" aria-pressed="false">Piss</button>
+        </div>
+        <input id="toilet-kind" type="hidden" value="SHIT" required>
+        <button type="submit">Eintrag speichern</button>
+      </form>
+      <div id="toilet-log-list" class="log-list"></div>
+    </section>
+
+    <section class="panel">
       <h2>Tagebuch</h2>
       <form id="diary-form" class="diary-form">
         <label>

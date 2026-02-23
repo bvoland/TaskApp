@@ -176,11 +176,23 @@ button:hover {
   gap: 8px;
 }
 
+.toilet-form {
+  display: grid;
+  gap: 10px;
+}
+
+.toilet-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .user-preset {
   font-weight: 700;
 }
 
-.user-preset.active {
+.user-preset.active,
+.toilet-preset.active {
   background: #d9f0be;
   border-color: #2f9e44;
 }
