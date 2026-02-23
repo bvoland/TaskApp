@@ -5,6 +5,8 @@
   const SLOT_WINDOW_MINUTES = 120;
   const LATE_AFTER_MINUTES = 90;
   const STORAGE_KEY = "dog-feedings-v1";
+  const STORAGE_KEY_PREFIX = "dog-feedings-v";
+  const STORAGE_MIGRATION_MARKER_KEY = "dog-feedings-migrated-v1";
 
   const selectedDateInput = document.getElementById("selected-date");
   const todayBtn = document.getElementById("today-btn");
@@ -354,8 +356,7 @@
   }
 
   function createLocalApi() {
-    function readAll() {
-      const raw = localStorage.getItem(STORAGE_KEY);
+    function parseEntries(raw) {
       if (!raw) {
         return [];
       }
@@ -367,8 +368,57 @@
       }
     }
 
+    function listLegacyStorageKeys() {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const key = localStorage.key(i);
+        if (!key) {
+          continue;
+        }
+        if (key === STORAGE_KEY || key.indexOf(STORAGE_KEY_PREFIX) !== 0) {
+          continue;
+        }
+        keys.push(key);
+      }
+      return keys;
+    }
+
+    function dedupeById(entries) {
+      const map = new Map();
+      entries.forEach(function (entry) {
+        const id = entry && entry.id ? String(entry.id) : "";
+        if (!id) {
+          return;
+        }
+        const existing = map.get(id);
+        if (!existing || new Date(entry.created_at || entry.fed_at || 0) > new Date(existing.created_at || existing.fed_at || 0)) {
+          map.set(id, entry);
+        }
+      });
+      return Array.from(map.values());
+    }
+
+    function migrateLegacyDataIfNeeded() {
+      if (localStorage.getItem(STORAGE_MIGRATION_MARKER_KEY) === "1") {
+        return;
+      }
+
+      const merged = parseEntries(localStorage.getItem(STORAGE_KEY));
+      listLegacyStorageKeys().forEach(function (key) {
+        merged.push.apply(merged, parseEntries(localStorage.getItem(key)));
+      });
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dedupeById(merged)));
+      localStorage.setItem(STORAGE_MIGRATION_MARKER_KEY, "1");
+    }
+
+    function readAll() {
+      migrateLegacyDataIfNeeded();
+      return dedupeById(parseEntries(localStorage.getItem(STORAGE_KEY)));
+    }
+
     function writeAll(entries) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dedupeById(entries)));
     }
 
     return {

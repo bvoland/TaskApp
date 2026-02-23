@@ -14,6 +14,7 @@ Erste Funktion: Oeffentliche Web-App (ohne Login) fuer die Familie, um Hundefuet
 - Shared Storage ueber Supabase (empfohlen) oder lokaler Fallback
 - Responsive Layout fuer Smartphone, Tablet und Desktop
 - Als mobile App installierbar (PWA: Android + iOS Home-Bildschirm)
+- Verlaufsdaten bleiben bei neuen App-Versionen erhalten (keine automatische Ueberschreibung)
 
 ## Lokal starten
 
@@ -36,6 +37,7 @@ window.APP_CONFIG = {
 ```
 
 Hinweis: `anon` Key ist fuer Client-Apps gedacht. Fuer dieses Familien-Tool ist das passend, aber die Daten sind bewusst ohne Login offen beschreibbar.
+Hinweis: Mit Supabase bleibt das Log bei neuen Versionen und auf allen Geraeten dauerhaft verfuegbar.
 
 ## Auf GitHub Pages veroeffentlichen
 
