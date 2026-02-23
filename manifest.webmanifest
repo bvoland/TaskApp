@@ -1,7 +1,7 @@
 {
-  "name": "Familie Hundefuetterung",
-  "short_name": "Hundefutter",
-  "description": "Gemeinsame Hundefuetterungsanzeige fuer die Familie.",
+  "name": "Charly Feed",
+  "short_name": "Charly Feed",
+  "description": "Gemeinsame Fuetterungsanzeige fuer Charly.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
