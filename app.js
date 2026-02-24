@@ -60,7 +60,7 @@
   const KATHI_COMPLIMENTS = buildKathiCompliments();
 
   function buildKathiCompliments() {
-    const starters = [
+    const openersGeneral = [
       "Kathi,",
       "Heute gilt für dich:",
       "Ganz ehrlich, Kathi,",
@@ -73,45 +73,75 @@
       "Ohne Übertreibung:"
     ];
 
-    const qualities = [
-      "du gibst allen um dich herum Sicherheit",
-      "deine Ruhe ist eine echte Stärke",
-      "du bringst Wärme in jeden Raum",
-      "deine Geduld ist beeindruckend",
-      "dein Blick für Details ist besonders",
-      "du bist unglaublich verlässlich",
-      "dein Humor tut richtig gut",
-      "deine Klarheit hilft allen",
-      "du hast ein großes Herz",
-      "du bleibst stark, auch wenn es voll wird",
-      "deine Art zu helfen ist unbezahlbar",
-      "du schaffst Struktur mit Leichtigkeit"
+    const openersFromBenny = [
+      "Benny sagt heute zu dir:",
+      "Von Benny für dich:",
+      "Eine Nachricht von Benny:",
+      "Heute direkt von deinem Mann:",
+      "Benny möchte dir sagen:"
     ];
 
-    const impacts = [
-      "und machst den Alltag für alle leichter",
-      "und gibst jedem das Gefühl, gesehen zu werden",
-      "und sorgst dafür, dass Zuhause sich richtig anfühlt",
-      "und bringst genau dann Ruhe rein, wenn sie gebraucht wird",
-      "und machst aus kleinen Momenten etwas Besonderes",
-      "und zeigst jeden Tag echte Stärke",
-      "und gibst der Familie einen festen Anker",
-      "und verbindest Herzlichkeit mit Klarheit",
-      "und bringst Menschen auf eine gute Spur",
-      "und schenkst allen ein bisschen mehr Leichtigkeit",
-      "und bist dabei immer authentisch und herzlich",
-      "und machst vieles besser, ohne großes Aufheben"
+    const themesFamily = [
+      "du kümmerst dich unglaublich liebevoll um Lukas und Amelie",
+      "Lukas und Amelie haben mit dir eine großartige Mama",
+      "deine Fürsorge für Lukas und Amelie ist jeden Tag spürbar",
+      "wie du mit Lukas und Amelie umgehst, ist einfach wundervoll",
+      "du gibst Lukas und Amelie so viel Sicherheit und Wärme",
+      "deine Geduld mit Lukas und Amelie ist beeindruckend"
     ];
 
+    const themesPartner = [
+      "du bist für Benny ein echter Ruhepol",
+      "deine Art macht eure Familie jeden Tag stärker",
+      "du schaffst es, dass Zuhause sich nach Zuhause anfühlt",
+      "deine Verlässlichkeit ist für alle ein Geschenk",
+      "dein großes Herz macht den Unterschied",
+      "du verbindest Stärke, Wärme und Humor auf besondere Weise"
+    ];
+
+    const themesLook = [
+      "heute siehst du wieder fantastisch aus",
+      "du strahlst heute wieder besonders schön",
+      "deine Ausstrahlung ist heute wieder absolut umwerfend",
+      "du siehst heute wieder einfach großartig aus",
+      "dein Lächeln macht heute wieder alles heller",
+      "du wirkst heute wieder unglaublich schön und stark zugleich"
+    ];
+
+    const closers = [
+      "und genau das macht dich so besonders.",
+      "und alle um dich herum profitieren davon.",
+      "und dafür wirst du sehr geschätzt.",
+      "und das verdient echte Anerkennung.",
+      "und darauf kannst du richtig stolz sein.",
+      "und das macht den Alltag für alle leichter."
+    ];
+
+    const topicPools = [themesFamily, themesPartner, themesLook];
     const compliments = [];
-    for (let i = 0; i < starters.length; i += 1) {
-      for (let j = 0; j < qualities.length; j += 1) {
-        const impact = impacts[(i + j) % impacts.length];
-        compliments.push(starters[i] + " " + qualities[j] + " " + impact + ".");
+
+    for (let i = 0; i < openersGeneral.length; i += 1) {
+      for (let p = 0; p < topicPools.length; p += 1) {
+        const pool = topicPools[p];
+        for (let j = 0; j < pool.length; j += 1) {
+          const closer = closers[(i + p + j) % closers.length];
+          compliments.push(openersGeneral[i] + " " + pool[j] + ", " + closer);
+        }
       }
     }
 
-    return compliments.slice(0, 120);
+    for (let i = 0; i < openersFromBenny.length; i += 1) {
+      for (let j = 0; j < themesFamily.length; j += 1) {
+        const closer = closers[(i + j) % closers.length];
+        compliments.push(openersFromBenny[i] + " " + themesFamily[j] + ", " + closer);
+      }
+      for (let j = 0; j < themesLook.length; j += 1) {
+        const closer = closers[(i + j + 2) % closers.length];
+        compliments.push(openersFromBenny[i] + " " + themesLook[j] + ", " + closer);
+      }
+    }
+
+    return compliments.slice(0, 140);
   }
 
   init();
