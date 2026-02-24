@@ -222,6 +222,12 @@ button:hover {
   flex-wrap: wrap;
 }
 
+.row-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .log-list {
   margin-top: 10px;
   display: grid;

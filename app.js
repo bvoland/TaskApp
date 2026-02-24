@@ -15,6 +15,9 @@
   const todayBtn = document.getElementById("today-btn");
   const installBtn = document.getElementById("install-btn");
   const refreshBtn = document.getElementById("refresh-btn");
+  const exportFeedingBtn = document.getElementById("export-feeding-btn");
+  const exportToiletBtn = document.getElementById("export-toilet-btn");
+  const exportDiaryBtn = document.getElementById("export-diary-btn");
   const storageInfo = document.getElementById("storage-info");
   const slotsRoot = document.getElementById("slots");
   const logList = document.getElementById("log-list");
@@ -122,6 +125,9 @@
     });
 
     refreshBtn.addEventListener("click", loadAllData);
+    exportFeedingBtn.addEventListener("click", exportFeedingCsv);
+    exportToiletBtn.addEventListener("click", exportToiletCsv);
+    exportDiaryBtn.addEventListener("click", exportDiaryCsv);
 
     feedingForm.addEventListener("submit", async function (event) {
       event.preventDefault();
@@ -553,6 +559,96 @@
     });
   }
 
+  async function exportFeedingCsv() {
+    try {
+      const rows = await api.listAllEntries();
+      const csv = toCsv(
+        ["id", "fed_at", "slot_time", "amount_g", "fed_by", "note", "created_at"],
+        rows.map(function (entry) {
+          return [
+            entry.id || "",
+            entry.fed_at || "",
+            entry.slot_time || "",
+            entry.amount_g || "",
+            entry.fed_by || "",
+            entry.note || "",
+            entry.created_at || ""
+          ];
+        })
+      );
+      downloadCsv("feeding-log", csv);
+    } catch (error) {
+      alert("Export fehlgeschlagen: " + String(error.message || error));
+    }
+  }
+
+  async function exportToiletCsv() {
+    try {
+      const rows = await api.listAllToiletEntries();
+      const csv = toCsv(
+        ["id", "event_at", "kind", "created_at"],
+        rows.map(function (entry) {
+          return [
+            entry.id || "",
+            entry.event_at || "",
+            entry.kind || "",
+            entry.created_at || ""
+          ];
+        })
+      );
+      downloadCsv("toilet-log", csv);
+    } catch (error) {
+      alert("Export fehlgeschlagen: " + String(error.message || error));
+    }
+  }
+
+  async function exportDiaryCsv() {
+    try {
+      const rows = await api.listAllDiaryEntries();
+      const csv = toCsv(
+        ["id", "entry_date", "author", "text", "created_at"],
+        rows.map(function (entry) {
+          return [
+            entry.id || "",
+            entry.entry_date || "",
+            entry.author || "",
+            entry.text || "",
+            entry.created_at || ""
+          ];
+        })
+      );
+      downloadCsv("tagebuch", csv);
+    } catch (error) {
+      alert("Export fehlgeschlagen: " + String(error.message || error));
+    }
+  }
+
+  function toCsv(headers, rows) {
+    const lines = [headers.join(",")];
+    rows.forEach(function (row) {
+      lines.push(row.map(csvCell).join(","));
+    });
+    return lines.join("\n");
+  }
+
+  function csvCell(value) {
+    const text = String(value == null ? "" : value);
+    return '"' + text.replace(/"/g, '""') + '"';
+  }
+
+  function downloadCsv(section, content) {
+    const stamp = todayISODate();
+    const blob = new Blob(["\ufeff" + content], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = section + "-" + stamp + ".csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
   function evaluateSlotStatus(slotDate, entry, nowOrNull) {
     if (entry) {
       const fedTime = new Date(entry.fed_at);
@@ -748,6 +844,9 @@
           return t >= range.fromMs && t <= range.toMs;
         });
       },
+      async listAllEntries() {
+        return readAll();
+      },
       async createEntry(payload) {
         const all = readAll();
         all.push({
@@ -765,6 +864,9 @@
         writeAll(next);
       },
       async listDiaryEntries() {
+        return readDiaryAll();
+      },
+      async listAllDiaryEntries() {
         return readDiaryAll();
       },
       async createDiaryEntry(payload) {
@@ -789,6 +891,9 @@
           const t = new Date(entry.event_at).getTime();
           return t >= range.fromMs && t <= range.toMs;
         });
+      },
+      async listAllToiletEntries() {
+        return readToiletAll();
       },
       async createToiletEntry(payload) {
         const all = readToiletAll();
@@ -848,6 +953,14 @@
         const data = await request(base + query, { method: "GET" });
         return Array.isArray(data) ? data : [];
       },
+      async listAllEntries() {
+        const query =
+          "?select=id,created_at,fed_at,amount_g,fed_by,note,slot_time" +
+          "&order=fed_at.desc" +
+          "&limit=5000";
+        const data = await request(base + query, { method: "GET" });
+        return Array.isArray(data) ? data : [];
+      },
       async createEntry(payload) {
         await request(base, {
           method: "POST",
@@ -867,6 +980,15 @@
           "&order=entry_date.desc" +
           "&order=created_at.desc" +
           "&limit=300";
+        const data = await request(diaryBase + query, { method: "GET" });
+        return Array.isArray(data) ? data : [];
+      },
+      async listAllDiaryEntries() {
+        const query =
+          "?select=id,created_at,entry_date,author,text" +
+          "&order=entry_date.desc" +
+          "&order=created_at.desc" +
+          "&limit=5000";
         const data = await request(diaryBase + query, { method: "GET" });
         return Array.isArray(data) ? data : [];
       },
@@ -892,6 +1014,14 @@
           "&event_at=gte." + encodeURIComponent(from) +
           "&event_at=lte." + encodeURIComponent(to) +
           "&order=event_at.desc";
+        const data = await request(toiletBase + query, { method: "GET" });
+        return Array.isArray(data) ? data : [];
+      },
+      async listAllToiletEntries() {
+        const query =
+          "?select=id,created_at,event_at,kind" +
+          "&order=event_at.desc" +
+          "&limit=5000";
         const data = await request(toiletBase + query, { method: "GET" });
         return Array.isArray(data) ? data : [];
       },

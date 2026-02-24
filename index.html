@@ -67,13 +67,19 @@
     <section class="panel">
       <div class="panel-title-row">
         <h2>Log</h2>
-        <button id="refresh-btn" type="button">Neu laden</button>
+        <div class="row-actions">
+          <button id="refresh-btn" type="button">Neu laden</button>
+          <button id="export-feeding-btn" type="button">Export CSV</button>
+        </div>
       </div>
       <div id="log-list" class="log-list"></div>
     </section>
 
     <section class="panel">
-      <h2>Shit &amp; Piss Log</h2>
+      <div class="panel-title-row">
+        <h2>Shit &amp; Piss Log</h2>
+        <button id="export-toilet-btn" type="button">Export CSV</button>
+      </div>
       <form id="toilet-form" class="toilet-form">
         <div class="toilet-picker" role="group" aria-label="Typ waehlen">
           <button type="button" class="toilet-preset active" data-kind="SHIT" aria-pressed="true">Shit</button>
@@ -86,7 +92,10 @@
     </section>
 
     <section class="panel">
-      <h2>Tagebuch</h2>
+      <div class="panel-title-row">
+        <h2>Tagebuch</h2>
+        <button id="export-diary-btn" type="button">Export CSV</button>
+      </div>
       <form id="diary-form" class="diary-form">
         <label>
           Datum

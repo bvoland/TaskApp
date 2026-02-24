@@ -1,4 +1,4 @@
-const CACHE_NAME = "dog-feed-app-v7";
+const CACHE_NAME = "dog-feed-app-v8";
 const STATIC_ASSETS = [
   "./",
   "./index.html",
