@@ -57,32 +57,62 @@
     diaryEntries: []
   };
 
-  const KATHI_COMPLIMENTS = [
-    "Kathi, du schaffst es jeden Tag, dass sich alles ein bisschen leichter anfühlt.",
-    "Deine Ruhe und dein Blick für die wichtigen Dinge sind einfach besonders.",
-    "Mit dir wird selbst ein chaotischer Tag zu etwas, das man gut meistern kann.",
-    "Du hast eine Art, die Menschen um dich herum sofort wohler fühlen zu lassen.",
-    "Dein Einsatz für die Familie ist stark, konstant und richtig beeindruckend.",
-    "Du bringst Wärme in den Alltag, ohne viel Aufhebens darum zu machen.",
-    "Deine Geduld und dein Herz sind eine seltene Kombination.",
-    "Du machst so viele kleine Dinge richtig, die für alle einen großen Unterschied machen.",
-    "Deine Verlässlichkeit ist ein riesiger Anker für alle um dich herum.",
-    "Du hast einen tollen Humor, der genau dann kommt, wenn man ihn braucht.",
-    "Deine Art zuzuhören ist eine echte Stärke.",
-    "Du hast ein Auge für Details, die anderen oft entgehen.",
-    "Du bist kreativ, pragmatisch und herzlich zugleich.",
-    "Mit deiner Energie bringst du Struktur und gute Stimmung zusammen.",
-    "Du gibst dem Alltag eine Qualität, die man nicht planen kann.",
-    "Du bist für viele Dinge gleichzeitig da und machst das mit erstaunlicher Leichtigkeit.",
-    "Dein Mitgefühl und deine Klarheit passen perfekt zusammen.",
-    "Du bist stark, ohne laut sein zu müssen.",
-    "Du schaffst es, dass sich Zuhause wirklich wie Zuhause anfühlt.",
-    "Deine positive Art steckt an und tut allen gut.",
-    "Du machst aus normalen Tagen oft richtig schöne Momente.",
-    "Deine Ausdauer ist bemerkenswert und inspirierend.",
-    "Du bist eine echte Teamplayerin mit einem großen Herzen.",
-    "Deine Art, Dinge anzupacken, ist konzentriert und bewundernswert."
-  ];
+  const KATHI_COMPLIMENTS = buildKathiCompliments();
+
+  function buildKathiCompliments() {
+    const starters = [
+      "Kathi,",
+      "Heute gilt für dich:",
+      "Ganz ehrlich, Kathi,",
+      "Ein Gedanke für dich:",
+      "Nur damit es gesagt ist:",
+      "Wichtig für heute:",
+      "Eins ist klar, Kathi,",
+      "Du darfst das ruhig hören:",
+      "Für den Tag mitgegeben:",
+      "Ohne Übertreibung:"
+    ];
+
+    const qualities = [
+      "du gibst allen um dich herum Sicherheit",
+      "deine Ruhe ist eine echte Stärke",
+      "du bringst Wärme in jeden Raum",
+      "deine Geduld ist beeindruckend",
+      "dein Blick für Details ist besonders",
+      "du bist unglaublich verlässlich",
+      "dein Humor tut richtig gut",
+      "deine Klarheit hilft allen",
+      "du hast ein großes Herz",
+      "du bleibst stark, auch wenn es voll wird",
+      "deine Art zu helfen ist unbezahlbar",
+      "du schaffst Struktur mit Leichtigkeit"
+    ];
+
+    const impacts = [
+      "und machst den Alltag für alle leichter",
+      "und gibst jedem das Gefühl, gesehen zu werden",
+      "und sorgst dafür, dass Zuhause sich richtig anfühlt",
+      "und bringst genau dann Ruhe rein, wenn sie gebraucht wird",
+      "und machst aus kleinen Momenten etwas Besonderes",
+      "und zeigst jeden Tag echte Stärke",
+      "und gibst der Familie einen festen Anker",
+      "und verbindest Herzlichkeit mit Klarheit",
+      "und bringst Menschen auf eine gute Spur",
+      "und schenkst allen ein bisschen mehr Leichtigkeit",
+      "und bist dabei immer authentisch und herzlich",
+      "und machst vieles besser, ohne großes Aufheben"
+    ];
+
+    const compliments = [];
+    for (let i = 0; i < starters.length; i += 1) {
+      for (let j = 0; j < qualities.length; j += 1) {
+        const impact = impacts[(i + j) % impacts.length];
+        compliments.push(starters[i] + " " + qualities[j] + " " + impact + ".");
+      }
+    }
+
+    return compliments.slice(0, 120);
+  }
 
   init();
 
