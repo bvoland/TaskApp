@@ -48,7 +48,7 @@
   const hasSupabase = Boolean(config.supabaseUrl && config.supabaseAnonKey);
 
   const api = hasSupabase ? createSupabaseApi(config) : createLocalApi();
-  storageInfo.textContent = hasSupabase ? "Speicher: Supabase (geteilt)" : "Speicher: lokal (nur dieses Geraet)";
+  storageInfo.textContent = hasSupabase ? "Speicher: Supabase (geteilt)" : "Speicher: lokal (nur dieses Gerät)";
 
   const state = {
     selectedDate: todayISODate(),
@@ -159,13 +159,13 @@
       const fedAt = new Date();
       const slotTime = slotWithinWindowHHMM(fedAt);
       if (!slotTime) {
-        alert("Aktuell nicht im Slot-Fenster. Eintrag ist nur bis 1 Stunde vor oder nach 08:00, 12:00, 16:00, 20:00 moeglich.");
+        alert("Aktuell nicht im Slot-Fenster. Eintrag ist nur bis 1 Stunde vor oder nach 08:00, 12:00, 16:00, 20:00 möglich.");
         return;
       }
 
       const amountG = Number(amountInput.value);
       if (!Number.isFinite(amountG) || amountG <= 0) {
-        alert("Bitte eine gueltige Menge in Gramm angeben.");
+        alert("Bitte eine gültige Menge in Gramm angeben.");
         return;
       }
 
@@ -195,7 +195,7 @@
 
       const kind = (toiletKindInput.value || "").trim();
       if (kind !== "SHIT" && kind !== "PISS") {
-        alert("Bitte Shit oder Piss auswaehlen.");
+        alert("Bitte Shit oder Piss auswählen.");
         return;
       }
 
@@ -222,7 +222,7 @@
       const author = (diaryAuthorInput.value || "").trim();
 
       if (!entryDate) {
-        alert("Bitte ein Datum waehlen.");
+        alert("Bitte ein Datum wählen.");
         return;
       }
       if (!text) {
@@ -376,7 +376,7 @@
       const delBtn = document.createElement("button");
       delBtn.type = "button";
       delBtn.className = "danger";
-      delBtn.textContent = "Loeschen";
+      delBtn.textContent = "Löschen";
       delBtn.addEventListener("click", async function () {
         const ok = confirm("Eintrag wirklich loeschen?");
         if (!ok) {
@@ -386,7 +386,7 @@
           await api.deleteToiletEntry(entry.id);
           await loadToiletEntries();
         } catch (error) {
-          alert("Loeschen fehlgeschlagen: " + String(error.message || error));
+          alert("Löschen fehlgeschlagen: " + String(error.message || error));
         }
       });
 
@@ -439,13 +439,13 @@
 
   async function manualMarkSlotAsFed(slotDate, slot) {
     const suggested = String(guessDefaultAmountG());
-    const raw = prompt("Menge in Gramm fuer " + slot + ":", suggested);
+    const raw = prompt("Menge in Gramm für " + slot + ":", suggested);
     if (raw === null) {
       return;
     }
     const amountG = Number(raw);
     if (!Number.isFinite(amountG) || amountG <= 0) {
-      alert("Bitte eine gueltige Menge in Gramm angeben.");
+      alert("Bitte eine gültige Menge in Gramm angeben.");
       return;
     }
 
@@ -504,7 +504,7 @@
       const delBtn = document.createElement("button");
       delBtn.type = "button";
       delBtn.className = "danger";
-      delBtn.textContent = "Loeschen";
+      delBtn.textContent = "Löschen";
       delBtn.addEventListener("click", async function () {
         const ok = confirm("Eintrag wirklich loeschen?");
         if (!ok) {
@@ -514,7 +514,7 @@
           await api.deleteEntry(entry.id);
           await loadEntries();
         } catch (error) {
-          alert("Loeschen fehlgeschlagen: " + String(error.message || error));
+          alert("Löschen fehlgeschlagen: " + String(error.message || error));
         }
       });
 
@@ -558,7 +558,7 @@
         '<article class="diary-item">' +
         '<div class="diary-meta">' + safe(createdText) + " | " + safe(entry.author || "Ohne Name") + "</div>" +
         '<div class="diary-body">' + safe(entry.text) + "</div>" +
-        '<button type="button" class="danger diary-delete" data-id="' + safe(entry.id) + '">Loeschen</button>' +
+        '<button type="button" class="danger diary-delete" data-id="' + safe(entry.id) + '">Löschen</button>' +
         "</article>";
     });
 
@@ -577,7 +577,7 @@
           await api.deleteDiaryEntry(id);
           await loadDiaryEntries();
         } catch (error) {
-          alert("Loeschen fehlgeschlagen: " + String(error.message || error));
+          alert("Löschen fehlgeschlagen: " + String(error.message || error));
         }
       });
     });
@@ -588,7 +588,7 @@
     const exportToilet = exportToiletInput.checked;
     const exportDiary = exportDiaryInput.checked;
     if (!exportFeeding && !exportToilet && !exportDiary) {
-      alert("Bitte mindestens eine Datenart auswaehlen.");
+      alert("Bitte mindestens eine Datenart auswählen.");
       return;
     }
 
@@ -765,12 +765,12 @@
 
     const diffMinutes = Math.round((nowOrNull - slotDate) / 60000);
     if (diffMinutes < -SLOT_WINDOW_MINUTES / 2) {
-      return { kind: "future", label: "Noch nicht faellig", detail: "Geplant fuer " + slotDate.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) };
+      return { kind: "future", label: "Noch nicht fällig", detail: "Geplant für " + slotDate.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) };
     }
     if (diffMinutes <= LATE_AFTER_MINUTES) {
       return { kind: "warn", label: "Faellig", detail: "Bitte bald fuettern" };
     }
-    return { kind: "bad", label: "Ueberfaellig", detail: "Kein Eintrag vorhanden" };
+    return { kind: "bad", label: "Überfällig", detail: "Kein Eintrag vorhanden" };
   }
 
   function groupLastEntryBySlot(entries) {
@@ -1169,7 +1169,7 @@
   function pickDailyCompliment(dayNumber) {
     const total = KATHI_COMPLIMENTS.length;
     if (total === 0) {
-      return "Kathi, du bist grossartig.";
+      return "Kathi, du bist großartig.";
     }
     const step = 7;
     const offset = 3;
