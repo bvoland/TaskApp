@@ -238,6 +238,12 @@ button:hover {
   min-height: auto;
 }
 
+.export-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .log-list {
   margin-top: 10px;
   display: grid;

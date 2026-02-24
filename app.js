@@ -19,6 +19,9 @@
   const exportFeedingInput = document.getElementById("export-feeding");
   const exportToiletInput = document.getElementById("export-toilet");
   const exportDiaryInput = document.getElementById("export-diary");
+  const exportRangeAllBtn = document.getElementById("export-range-all");
+  const exportRange7dBtn = document.getElementById("export-range-7d");
+  const exportRangeMonthBtn = document.getElementById("export-range-month");
   const exportFromDateInput = document.getElementById("export-from-date");
   const exportToDateInput = document.getElementById("export-to-date");
   const storageInfo = document.getElementById("storage-info");
@@ -132,6 +135,22 @@
     exportForm.addEventListener("submit", async function (event) {
       event.preventDefault();
       await exportCombinedCsv();
+    });
+    exportRangeAllBtn.addEventListener("click", function () {
+      exportFromDateInput.value = "";
+      exportToDateInput.value = "";
+    });
+    exportRange7dBtn.addEventListener("click", function () {
+      const today = new Date();
+      const from = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
+      exportFromDateInput.value = toIsoDate(from);
+      exportToDateInput.value = toIsoDate(today);
+    });
+    exportRangeMonthBtn.addEventListener("click", function () {
+      const today = new Date();
+      const from = new Date(today.getFullYear(), today.getMonth(), 1);
+      exportFromDateInput.value = toIsoDate(from);
+      exportToDateInput.value = toIsoDate(today);
     });
 
     feedingForm.addEventListener("submit", async function (event) {
@@ -817,9 +836,13 @@
 
   function todayISODate() {
     const d = new Date();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return d.getFullYear() + "-" + month + "-" + day;
+    return toIsoDate(d);
+  }
+
+  function toIsoDate(dateObj) {
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    return dateObj.getFullYear() + "-" + month + "-" + day;
   }
 
   function createLocalApi() {

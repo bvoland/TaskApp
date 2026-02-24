@@ -34,33 +34,6 @@
     </section>
 
     <section class="panel">
-      <h2>Export</h2>
-      <form id="export-form" class="export-form">
-        <label class="export-check">
-          <input id="export-feeding" type="checkbox" checked>
-          Fuetterungslog
-        </label>
-        <label class="export-check">
-          <input id="export-toilet" type="checkbox" checked>
-          Shit &amp; Piss Log
-        </label>
-        <label class="export-check">
-          <input id="export-diary" type="checkbox" checked>
-          Tagebuch
-        </label>
-        <label>
-          Von (optional)
-          <input id="export-from-date" type="date">
-        </label>
-        <label>
-          Bis (optional)
-          <input id="export-to-date" type="date">
-        </label>
-        <button id="export-btn" type="submit">Export CSV</button>
-      </form>
-    </section>
-
-    <section class="panel">
       <h2>Ampel je Fuetterungszeit</h2>
       <div id="slots" class="slots"></div>
     </section>
@@ -140,6 +113,38 @@
         <button type="submit">Tagebuch speichern</button>
       </form>
       <div id="diary-timeline" class="diary-timeline"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Export</h2>
+      <form id="export-form" class="export-form">
+        <label class="export-check">
+          <input id="export-feeding" type="checkbox" checked>
+          Fuetterungslog
+        </label>
+        <label class="export-check">
+          <input id="export-toilet" type="checkbox" checked>
+          Shit &amp; Piss Log
+        </label>
+        <label class="export-check">
+          <input id="export-diary" type="checkbox" checked>
+          Tagebuch
+        </label>
+        <div class="export-quick">
+          <button id="export-range-all" type="button">Alles</button>
+          <button id="export-range-7d" type="button">Letzte 7 Tage</button>
+          <button id="export-range-month" type="button">Dieser Monat</button>
+        </div>
+        <label>
+          Von (optional)
+          <input id="export-from-date" type="date">
+        </label>
+        <label>
+          Bis (optional)
+          <input id="export-to-date" type="date">
+        </label>
+        <button id="export-btn" type="submit">Export CSV</button>
+      </form>
     </section>
   </main>
 
