@@ -15,9 +15,12 @@
   const todayBtn = document.getElementById("today-btn");
   const installBtn = document.getElementById("install-btn");
   const refreshBtn = document.getElementById("refresh-btn");
-  const exportFeedingBtn = document.getElementById("export-feeding-btn");
-  const exportToiletBtn = document.getElementById("export-toilet-btn");
-  const exportDiaryBtn = document.getElementById("export-diary-btn");
+  const exportForm = document.getElementById("export-form");
+  const exportFeedingInput = document.getElementById("export-feeding");
+  const exportToiletInput = document.getElementById("export-toilet");
+  const exportDiaryInput = document.getElementById("export-diary");
+  const exportFromDateInput = document.getElementById("export-from-date");
+  const exportToDateInput = document.getElementById("export-to-date");
   const storageInfo = document.getElementById("storage-info");
   const slotsRoot = document.getElementById("slots");
   const logList = document.getElementById("log-list");
@@ -85,6 +88,7 @@
     setSelectedUser("Benny");
     setSelectedToiletKind("SHIT");
     diaryDateInput.value = state.selectedDate;
+    exportToDateInput.value = state.selectedDate;
     renderKathiCompliment();
     registerServiceWorker();
     setupInstallPrompt();
@@ -125,9 +129,10 @@
     });
 
     refreshBtn.addEventListener("click", loadAllData);
-    exportFeedingBtn.addEventListener("click", exportFeedingCsv);
-    exportToiletBtn.addEventListener("click", exportToiletCsv);
-    exportDiaryBtn.addEventListener("click", exportDiaryCsv);
+    exportForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      await exportCombinedCsv();
+    });
 
     feedingForm.addEventListener("submit", async function (event) {
       event.preventDefault();
@@ -559,65 +564,102 @@
     });
   }
 
-  async function exportFeedingCsv() {
+  async function exportCombinedCsv() {
+    const exportFeeding = exportFeedingInput.checked;
+    const exportToilet = exportToiletInput.checked;
+    const exportDiary = exportDiaryInput.checked;
+    if (!exportFeeding && !exportToilet && !exportDiary) {
+      alert("Bitte mindestens eine Datenart auswaehlen.");
+      return;
+    }
+
+    const fromDate = (exportFromDateInput.value || "").trim();
+    const toDate = (exportToDateInput.value || "").trim();
+    if (fromDate && toDate && fromDate > toDate) {
+      alert("Der Von-Wert darf nicht nach dem Bis-Wert liegen.");
+      return;
+    }
+
     try {
-      const rows = await api.listAllEntries();
-      const csv = toCsv(
-        ["id", "fed_at", "slot_time", "amount_g", "fed_by", "note", "created_at"],
-        rows.map(function (entry) {
-          return [
+      const rows = [];
+
+      if (exportFeeding) {
+        const feedingRows = await api.listAllEntries();
+        feedingRows.forEach(function (entry) {
+          const eventDate = isoToLocalDate(entry.fed_at);
+          if (!withinDateRange(eventDate, fromDate, toDate)) {
+            return;
+          }
+          rows.push([
+            "feeding",
             entry.id || "",
-            entry.fed_at || "",
-            entry.slot_time || "",
-            entry.amount_g || "",
+            eventDate,
+            isoToLocalTime(entry.fed_at),
             entry.fed_by || "",
+            entry.amount_g || "",
+            entry.slot_time || "",
             entry.note || "",
+            "",
             entry.created_at || ""
-          ];
-        })
-      );
-      downloadCsv("feeding-log", csv);
-    } catch (error) {
-      alert("Export fehlgeschlagen: " + String(error.message || error));
-    }
-  }
+          ]);
+        });
+      }
 
-  async function exportToiletCsv() {
-    try {
-      const rows = await api.listAllToiletEntries();
-      const csv = toCsv(
-        ["id", "event_at", "kind", "created_at"],
-        rows.map(function (entry) {
-          return [
+      if (exportToilet) {
+        const toiletRows = await api.listAllToiletEntries();
+        toiletRows.forEach(function (entry) {
+          const eventDate = isoToLocalDate(entry.event_at);
+          if (!withinDateRange(eventDate, fromDate, toDate)) {
+            return;
+          }
+          rows.push([
+            "toilet",
             entry.id || "",
-            entry.event_at || "",
+            eventDate,
+            isoToLocalTime(entry.event_at),
             entry.kind || "",
+            "",
+            "",
+            "",
+            "",
             entry.created_at || ""
-          ];
-        })
-      );
-      downloadCsv("toilet-log", csv);
-    } catch (error) {
-      alert("Export fehlgeschlagen: " + String(error.message || error));
-    }
-  }
+          ]);
+        });
+      }
 
-  async function exportDiaryCsv() {
-    try {
-      const rows = await api.listAllDiaryEntries();
-      const csv = toCsv(
-        ["id", "entry_date", "author", "text", "created_at"],
-        rows.map(function (entry) {
-          return [
+      if (exportDiary) {
+        const diaryRows = await api.listAllDiaryEntries();
+        diaryRows.forEach(function (entry) {
+          const eventDate = entry.entry_date || "";
+          if (!withinDateRange(eventDate, fromDate, toDate)) {
+            return;
+          }
+          rows.push([
+            "diary",
             entry.id || "",
-            entry.entry_date || "",
+            eventDate,
+            isoToLocalTime(entry.created_at),
             entry.author || "",
+            "",
+            "",
+            "",
             entry.text || "",
             entry.created_at || ""
-          ];
-        })
+          ]);
+        });
+      }
+
+      rows.sort(function (a, b) {
+        const aKey = (a[2] || "") + "T" + (a[3] || "00:00");
+        const bKey = (b[2] || "") + "T" + (b[3] || "00:00");
+        return aKey < bKey ? 1 : -1;
+      });
+
+      const csv = toCsv(
+        ["section", "id", "event_date", "event_time", "actor_or_kind", "amount_g", "slot_time", "note", "text", "created_at"],
+        rows
       );
-      downloadCsv("tagebuch", csv);
+      downloadCsv("charly-export", csv);
     } catch (error) {
       alert("Export fehlgeschlagen: " + String(error.message || error));
     }
@@ -634,6 +676,45 @@
   function csvCell(value) {
     const text = String(value == null ? "" : value);
     return '"' + text.replace(/"/g, '""') + '"';
+  }
+
+  function isoToLocalDate(isoString) {
+    if (!isoString) {
+      return "";
+    }
+    const dateObj = new Date(isoString);
+    if (Number.isNaN(dateObj.getTime())) {
+      return "";
+    }
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    return dateObj.getFullYear() + "-" + month + "-" + day;
+  }
+
+  function isoToLocalTime(isoString) {
+    if (!isoString) {
+      return "";
+    }
+    const dateObj = new Date(isoString);
+    if (Number.isNaN(dateObj.getTime())) {
+      return "";
+    }
+    const hour = String(dateObj.getHours()).padStart(2, "0");
+    const minute = String(dateObj.getMinutes()).padStart(2, "0");
+    return hour + ":" + minute;
+  }
+
+  function withinDateRange(eventDate, fromDate, toDate) {
+    if (!eventDate) {
+      return false;
+    }
+    if (fromDate && eventDate < fromDate) {
+      return false;
+    }
+    if (toDate && eventDate > toDate) {
+      return false;
+    }
+    return true;
   }
 
   function downloadCsv(section, content) {

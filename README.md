@@ -6,7 +6,7 @@ Erste Funktion: Oeffentliche Web-App (ohne Login) fuer die Familie, um Hundefuet
 
 - Ampelanzeige je Slot: `08:00`, `12:00`, `16:00`, `20:00`
 - Vergangene Slots koennen bei Bedarf manuell auf gruen gesetzt werden
-- CSV-Export je Sektion (Fuetterung, Shit/Piss, Tagebuch)
+- Zentraler CSV-Export mit Checkbox-Auswahl (Fuetterung, Shit/Piss, Tagebuch) und optionalem Datumsbereich
 - Eintrag von:
   - Zeitpunkt der Fuetterung
   - Menge in Gramm

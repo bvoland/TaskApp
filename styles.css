@@ -222,10 +222,20 @@ button:hover {
   flex-wrap: wrap;
 }
 
-.row-actions {
+.export-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.export-check {
   display: flex;
+  align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+}
+
+.export-check input {
+  min-height: auto;
 }
 
 .log-list {

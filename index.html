@@ -34,6 +34,33 @@
     </section>
 
     <section class="panel">
+      <h2>Export</h2>
+      <form id="export-form" class="export-form">
+        <label class="export-check">
+          <input id="export-feeding" type="checkbox" checked>
+          Fuetterungslog
+        </label>
+        <label class="export-check">
+          <input id="export-toilet" type="checkbox" checked>
+          Shit &amp; Piss Log
+        </label>
+        <label class="export-check">
+          <input id="export-diary" type="checkbox" checked>
+          Tagebuch
+        </label>
+        <label>
+          Von (optional)
+          <input id="export-from-date" type="date">
+        </label>
+        <label>
+          Bis (optional)
+          <input id="export-to-date" type="date">
+        </label>
+        <button id="export-btn" type="submit">Export CSV</button>
+      </form>
+    </section>
+
+    <section class="panel">
       <h2>Ampel je Fuetterungszeit</h2>
       <div id="slots" class="slots"></div>
     </section>
@@ -67,10 +94,7 @@
     <section class="panel">
       <div class="panel-title-row">
         <h2>Log</h2>
-        <div class="row-actions">
-          <button id="refresh-btn" type="button">Neu laden</button>
-          <button id="export-feeding-btn" type="button">Export CSV</button>
-        </div>
+        <button id="refresh-btn" type="button">Neu laden</button>
       </div>
       <div id="log-list" class="log-list"></div>
     </section>
@@ -78,7 +102,6 @@
     <section class="panel">
       <div class="panel-title-row">
         <h2>Shit &amp; Piss Log</h2>
-        <button id="export-toilet-btn" type="button">Export CSV</button>
       </div>
       <form id="toilet-form" class="toilet-form">
         <div class="toilet-picker" role="group" aria-label="Typ waehlen">
@@ -94,7 +117,6 @@
     <section class="panel">
       <div class="panel-title-row">
         <h2>Tagebuch</h2>
-        <button id="export-diary-btn" type="button">Export CSV</button>
       </div>
       <form id="diary-form" class="diary-form">
         <label>
