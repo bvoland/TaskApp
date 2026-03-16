@@ -5,6 +5,7 @@
   const SLOT_WINDOW_MINUTES = 120;
   const LATE_AFTER_MINUTES = 90;
   const SLOT_ASSIGNMENT_WINDOW_MINUTES = 120;
+  const APP_VERSION = "v2026.03.16-1";
   const STORAGE_KEY = "dog-feedings-v1";
   const TOILET_STORAGE_KEY = "dog-toilet-v1";
   const DIARY_STORAGE_KEY = "family-diary-v1";
@@ -28,6 +29,7 @@
   const slotsRoot = document.getElementById("slots");
   const logList = document.getElementById("log-list");
   const kathiComplimentText = document.getElementById("kathi-compliment");
+  const appVersionText = document.getElementById("app-version");
 
   const feedingForm = document.getElementById("feeding-form");
   const userPresetButtons = Array.from(document.querySelectorAll(".user-preset"));
@@ -160,6 +162,7 @@
   init();
 
   async function init() {
+    renderAppVersion();
     selectedDateInput.value = state.selectedDate;
     setSelectedUser("Benny");
     setSelectedToiletKind("SHIT");
@@ -170,6 +173,13 @@
     setupInstallPrompt();
     attachEvents();
     await loadAllData();
+  }
+
+  function renderAppVersion() {
+    if (!appVersionText) {
+      return;
+    }
+    appVersionText.textContent = "Version: " + APP_VERSION;
   }
 
   function attachEvents() {
