@@ -5,7 +5,7 @@
   const SLOT_WINDOW_MINUTES = 120;
   const LATE_AFTER_MINUTES = 90;
   const SLOT_ASSIGNMENT_WINDOW_MINUTES = 120;
-  const APP_VERSION = "v2026.03.16-1";
+  const APP_VERSION = "v2026.03.16-local";
   const STORAGE_KEY = "dog-feedings-v1";
   const TOILET_STORAGE_KEY = "dog-toilet-v1";
   const DIARY_STORAGE_KEY = "family-diary-v1";
@@ -179,7 +179,34 @@
     if (!appVersionText) {
       return;
     }
-    appVersionText.textContent = "Version: " + APP_VERSION;
+    appVersionText.textContent = "Version: " + APP_VERSION + " (lokal)";
+    loadVersionMetadata();
+  }
+
+  async function loadVersionMetadata() {
+    if (!appVersionText) {
+      return;
+    }
+
+    try {
+      const response = await fetch("./version.json?ts=" + Date.now(), { cache: "no-store" });
+      if (!response.ok) {
+        return;
+      }
+
+      const data = await response.json();
+      if (!data || !data.version) {
+        return;
+      }
+
+      let text = "Version: " + data.version;
+      if (data.commit) {
+        text += " | Commit: " + data.commit;
+      }
+      appVersionText.textContent = text;
+    } catch (_error) {
+      // Keep the local fallback version if version.json is not available.
+    }
   }
 
   function attachEvents() {

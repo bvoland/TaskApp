@@ -24,6 +24,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Generate version metadata
+        run: |
+          short_sha="${GITHUB_SHA::7}"
+          version="v$(date -u +%Y.%m.%d)-${GITHUB_RUN_NUMBER}"
+          deployed_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          cat > version.json <<EOF
+          {
+            "version": "${version}",
+            "commit": "${short_sha}",
+            "deployed_at": "${deployed_at}"
+          }
+          EOF
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
