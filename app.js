@@ -354,7 +354,7 @@
 
     installBtn.addEventListener("click", async function () {
       if (!deferredPrompt) {
-        alert("Auf iPhone: Teilen > Zum Home-Bildschirm. Auf Android: Browser-Menue > Installieren.");
+        alert("Auf iPhone: Teilen > Zum Home-Bildschirm. Auf Android: Browser-Menü > Installieren.");
         return;
       }
 
@@ -408,7 +408,7 @@
 
   function renderToiletLog() {
     if (!state.toiletEntries.length) {
-      toiletLogList.innerHTML = "<p>Noch keine Eintraege an diesem Tag.</p>";
+      toiletLogList.innerHTML = "<p>Noch keine Einträge an diesem Tag.</p>";
       return;
     }
 
@@ -438,7 +438,7 @@
       delBtn.className = "danger";
       delBtn.textContent = "Löschen";
       delBtn.addEventListener("click", async function () {
-        const ok = confirm("Eintrag wirklich loeschen?");
+        const ok = confirm("Eintrag wirklich löschen?");
         if (!ok) {
           return;
         }
@@ -483,9 +483,9 @@
         const manualBtn = document.createElement("button");
         manualBtn.type = "button";
         manualBtn.className = "slot-manual-btn";
-        manualBtn.textContent = "Manuell auf gruen";
+        manualBtn.textContent = "Manuell auf grün";
         manualBtn.addEventListener("click", async function () {
-          await manualMarkSlotAsFed(slotDate, slot);
+          await manualMarkSlotAsFedWithTime(slotDate, slot);
         });
         right.appendChild(document.createElement("br"));
         right.appendChild(manualBtn);
@@ -514,13 +514,79 @@
         fed_at: slotDate.toISOString(),
         amount_g: Math.round(amountG),
         fed_by: "Manuell",
-        note: "Manuell auf gruen gesetzt",
+        note: "Manuell auf grün gesetzt",
         slot_time: slot
       });
       await loadEntries();
     } catch (error) {
       alert("Manuelles Setzen fehlgeschlagen: " + String(error.message || error));
     }
+  }
+
+  async function manualMarkSlotAsFedWithTime(slotDate, slot) {
+    const suggestedAmount = String(guessDefaultAmountG());
+    const rawAmount = prompt("Menge in Gramm für " + slot + ":", suggestedAmount);
+    if (rawAmount === null) {
+      return;
+    }
+
+    const amountG = Number(rawAmount);
+    if (!Number.isFinite(amountG) || amountG <= 0) {
+      alert("Bitte eine gültige Menge in Gramm angeben.");
+      return;
+    }
+
+    const rawTime = prompt("Uhrzeit für " + slot + " (HH:MM):", slot);
+    if (rawTime === null) {
+      return;
+    }
+
+    const fedAt = dateWithPromptedTime(slotDate, rawTime);
+    if (!fedAt) {
+      alert("Bitte eine gültige Uhrzeit im Format HH:MM angeben.");
+      return;
+    }
+
+    if (fedAt.getTime() > Date.now()) {
+      alert("Die Uhrzeit darf nicht in der Zukunft liegen.");
+      return;
+    }
+
+    try {
+      await api.createEntry({
+        fed_at: fedAt.toISOString(),
+        amount_g: Math.round(amountG),
+        fed_by: "Manuell",
+        note: "Manuell auf grün gesetzt",
+        slot_time: slot
+      });
+      await loadEntries();
+    } catch (error) {
+      alert("Manuelles Setzen fehlgeschlagen: " + String(error.message || error));
+    }
+  }
+
+  function dateWithPromptedTime(baseDate, hhmmInput) {
+    const match = String(hhmmInput || "").trim().match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) {
+      return null;
+    }
+
+    const hours = Number(match[1]);
+    const minutes = Number(match[2]);
+    if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+      return null;
+    }
+
+    return new Date(
+      baseDate.getFullYear(),
+      baseDate.getMonth(),
+      baseDate.getDate(),
+      hours,
+      minutes,
+      0,
+      0
+    );
   }
 
   function guessDefaultAmountG() {
@@ -535,7 +601,7 @@
 
   function renderLog() {
     if (!state.entries.length) {
-      logList.innerHTML = "<p>Noch keine Eintraege an diesem Tag.</p>";
+      logList.innerHTML = "<p>Noch keine Einträge an diesem Tag.</p>";
       return;
     }
 
@@ -566,7 +632,7 @@
       delBtn.className = "danger";
       delBtn.textContent = "Löschen";
       delBtn.addEventListener("click", async function () {
-        const ok = confirm("Eintrag wirklich loeschen?");
+        const ok = confirm("Eintrag wirklich löschen?");
         if (!ok) {
           return;
         }
@@ -585,7 +651,7 @@
 
   function renderDiaryTimeline() {
     if (!state.diaryEntries.length) {
-      diaryTimeline.innerHTML = "<p>Noch keine Tagebucheintraege vorhanden.</p>";
+      diaryTimeline.innerHTML = "<p>Noch keine Tagebucheinträge vorhanden.</p>";
       return;
     }
 
@@ -629,7 +695,7 @@
         if (!id) {
           return;
         }
-        const ok = confirm("Tagebucheintrag wirklich loeschen?");
+        const ok = confirm("Tagebucheintrag wirklich löschen?");
         if (!ok) {
           return;
         }
@@ -815,12 +881,12 @@
       return {
         kind: "ok",
         label: "Erledigt",
-        detail: "Gefuettert um " + fedTime.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) + " (" + entry.amount_g + " g)"
+        detail: "Gefüttert um " + fedTime.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) + " (" + entry.amount_g + " g)"
       };
     }
 
     if (!nowOrNull) {
-      return { kind: "bad", label: "Nicht gefuettert", detail: "Kein Eintrag vorhanden" };
+      return { kind: "bad", label: "Nicht gefüttert", detail: "Kein Eintrag vorhanden" };
     }
 
     const diffMinutes = Math.round((nowOrNull - slotDate) / 60000);
@@ -828,7 +894,7 @@
       return { kind: "future", label: "Noch nicht fällig", detail: "Geplant für " + slotDate.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) };
     }
     if (diffMinutes <= LATE_AFTER_MINUTES) {
-      return { kind: "warn", label: "Faellig", detail: "Bitte bald fuettern" };
+      return { kind: "warn", label: "Fällig", detail: "Bitte bald füttern" };
     }
     return { kind: "bad", label: "Überfällig", detail: "Kein Eintrag vorhanden" };
   }
