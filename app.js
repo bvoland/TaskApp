@@ -108,6 +108,15 @@
       "du wirkst heute wieder unglaublich schön und stark zugleich"
     ];
 
+    const bennyTasks = [
+      "du koenntest Benny heute mit einer kleinen Massage ueberraschen",
+      "Benny wuerde sich heute bestimmt ueber eine extra liebe Umarmung freuen",
+      "wie waere es, wenn du Benny heute einen lieben Zettel hinterlaesst",
+      "du koenntest Benny heute einen kleinen Kaffee oder Tee ans Sofa bringen",
+      "Benny freut sich heute bestimmt ueber ein ehrliches Kompliment von dir",
+      "du koenntest Benny heute bewusst ein paar ruhige Minuten nur fuer euch schenken"
+    ];
+
     const closers = [
       "und genau das macht dich so besonders.",
       "und alle um dich herum profitieren davon.",
@@ -117,7 +126,7 @@
       "und das macht den Alltag für alle leichter."
     ];
 
-    const topicPools = [themesFamily, themesPartner, themesLook];
+    const topicPools = [themesFamily, themesPartner, themesLook, bennyTasks];
     const compliments = [];
 
     for (let i = 0; i < openersGeneral.length; i += 1) {
@@ -138,6 +147,10 @@
       for (let j = 0; j < themesLook.length; j += 1) {
         const closer = closers[(i + j + 2) % closers.length];
         compliments.push(openersFromBenny[i] + " " + themesLook[j] + ", " + closer);
+      }
+      for (let j = 0; j < bennyTasks.length; j += 1) {
+        const closer = closers[(i + j + 4) % closers.length];
+        compliments.push(openersFromBenny[i] + " " + bennyTasks[j] + ", " + closer);
       }
     }
 
