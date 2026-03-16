@@ -4,7 +4,7 @@
   const FEEDING_SLOTS = ["08:00", "12:00", "16:00", "20:00"];
   const SLOT_WINDOW_MINUTES = 120;
   const LATE_AFTER_MINUTES = 90;
-  const SLOT_ASSIGNMENT_WINDOW_MINUTES = 60;
+  const SLOT_ASSIGNMENT_WINDOW_MINUTES = 120;
   const STORAGE_KEY = "dog-feedings-v1";
   const TOILET_STORAGE_KEY = "dog-toilet-v1";
   const DIARY_STORAGE_KEY = "family-diary-v1";
@@ -219,7 +219,7 @@
       const fedAt = new Date();
       const slotTime = slotWithinWindowHHMM(fedAt);
       if (!slotTime) {
-        alert("Aktuell nicht im Slot-Fenster. Eintrag ist nur bis 1 Stunde vor oder nach 08:00, 12:00, 16:00, 20:00 möglich.");
+        alert("Aktuell nicht im Slot-Fenster. Eintrag ist nur bis 2 Stunden vor oder nach 08:00, 12:00, 16:00, 20:00 möglich.");
         return;
       }
 

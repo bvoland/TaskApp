@@ -50,7 +50,7 @@ When schema changes are added, run `supabase.sql` again in Supabase SQL Editor.
   - 16:00
   - 20:00
 - Normal entry uses current timestamp only.
-- Auto-slot assignment only within +/- 1 hour around a slot.
+- Auto-slot assignment only within +/- 2 hours around a slot.
 - Manual override:
   - past slots can be manually set to green (`Manuell auf grün`)
   - creates a feeding entry with slot timestamp
