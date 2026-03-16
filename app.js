@@ -109,12 +109,12 @@
     ];
 
     const bennyTasks = [
-      "du koenntest Benny heute mit einer liebevollen Massage verwoehnen",
-      "Benny wuerde heute ganz bestimmt fuer eine lange, warme Umarmung dahinschmelzen",
-      "wie waere es, wenn du Benny heute eine kleine suesse Nachricht hinterlaesst",
-      "du koenntest Benny heute seinen Lieblingskaffee oder Tee mit einem Laecheln bringen",
-      "Benny freut sich heute bestimmt ueber ein ehrliches, flirtiges Kompliment von dir",
-      "du koenntest dir heute bewusst ein paar zarte Minuten nur fuer Benny nehmen"
+      "du koenntest Benny heute mit einer Massage verwoehnen, bei der er garantiert mehr will",
+      "Benny wuerde heute bestimmt schwach werden, wenn du ihn etwas laenger als noetig umarmst",
+      "wie waere es, wenn du Benny heute eine suesse Nachricht schreibst, die ihm sofort Kopfkino macht",
+      "du koenntest Benny heute seinen Kaffee mit einem Blick bringen, der mehr verspricht",
+      "Benny freut sich heute bestimmt ueber ein Kompliment, das ihn den ganzen Abend nicht loslaesst",
+      "du koenntest dir heute bewusst ein paar freche Minuten nur fuer Benny nehmen"
     ];
 
     const closers = [
