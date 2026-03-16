@@ -319,6 +319,21 @@ button:hover {
   padding: 4px 0 20px;
 }
 
+.app-version-button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-version-button:hover {
+  color: var(--text);
+}
+
 @media (max-width: 640px) {
   .app {
     padding-left: 12px;

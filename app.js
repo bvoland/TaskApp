@@ -179,7 +179,9 @@
     if (!appVersionText) {
       return;
     }
-    appVersionText.textContent = "Version: " + APP_VERSION + " (lokal)";
+    appVersionText.textContent = "Version: " + APP_VERSION + " (lokal) | Tippen zum Aktualisieren";
+    appVersionText.title = "Cache leeren und App neu laden";
+    appVersionText.addEventListener("click", clearAppCacheAndReload);
     loadVersionMetadata();
   }
 
@@ -203,10 +205,44 @@
       if (data.commit) {
         text += " | Commit: " + data.commit;
       }
-      appVersionText.textContent = text;
+      appVersionText.textContent = text + " | Tippen zum Aktualisieren";
     } catch (_error) {
       // Keep the local fallback version if version.json is not available.
     }
+  }
+
+  async function clearAppCacheAndReload() {
+    const confirmed = confirm("App-Cache leeren und neu laden?");
+    if (!confirmed) {
+      return;
+    }
+
+    if (appVersionText) {
+      appVersionText.disabled = true;
+      appVersionText.textContent = "Aktualisiere App...";
+    }
+
+    try {
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(function (registration) {
+          return registration.unregister();
+        }));
+      }
+
+      if ("caches" in window) {
+        const cacheKeys = await caches.keys();
+        await Promise.all(cacheKeys.map(function (key) {
+          return caches.delete(key);
+        }));
+      }
+    } catch (_error) {
+      // Even if cleanup only partially works, continue with a hard reload attempt.
+    }
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("refresh", String(Date.now()));
+    window.location.replace(url.toString());
   }
 
   function attachEvents() {
